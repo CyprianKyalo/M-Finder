@@ -1,0 +1,6 @@
+lfw/
+node_modules/
+train/
+
+__pycache__
+package-lock.json
