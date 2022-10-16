@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
-    <title>M-Finder</title>
-</head>
-<body>
-   <h1>Welcome to M-Finder</h1>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Welcome to M-Finder {% endblock %}</h1>
+
+    <p>Include your address</p>
+    <span>My oh my</span>
+{% endblock %}
