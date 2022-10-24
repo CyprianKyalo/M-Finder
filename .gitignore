@@ -1,6 +1,11 @@
 lfw/
 node_modules/
 train/
+train_data/
+dataset/
+Extracted Faces/
+train_set/
+dataset.zip
 
 __pycache__
 package-lock.json
