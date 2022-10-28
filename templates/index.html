@@ -1,11 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
-    <title>M-Finder</title>
-</head>
-<body>
-   <h1>Welcome to M-Finder</h1>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Welcome to M-Finder {% endblock %}</h1>
+
+    <div class="flex-container">
+        <section id="left">
+            <h2>M-Finder</h2>
+            <p>The system that helps you track your loved one.</p>
+        </section>
+
+        <section id="right">
+            <img src="../static/uploads/logo.jpeg" alt="">
+        </section>
+    </div>
+    
+    <!-- <div id="video">
+        <img src="{{ url_for('video_feed') }}" height="100%" id="video">
+    </div> -->
+
+
+{% endblock %}

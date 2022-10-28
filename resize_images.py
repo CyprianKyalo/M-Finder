@@ -42,8 +42,6 @@ def getData(dirname="Images", img_shape=(100, 100)):
 
 
 def transfer(dirname, img_shape=(100, 100)):
-    j = 0
-
     folders = os.listdir(dirname)
 
     path = "train"
@@ -72,7 +70,77 @@ def transfer(dirname, img_shape=(100, 100)):
 
             print(image)
 
+def trainingPath(dirname, img_shape=(100, 100)):
+    training_path = "training"
+    validation_path = "validation"
+
+    folders = os.listdir(dirname)
+
+    if not os.path.exists(training_path):
+        os.mkdir(training_path, 0o777)
+
+    if not os.path.exists(validation_path):
+        os.mkdir(validation_path, 0o777)
+
+    j = 0
+
+    for folder in folders:
+        entries = os.listdir(os.path.join(dirname, folder))
+
+        for entry in entries:
+            img = open(os.path.join(dirname, folder, entry), 'rb')
+            image = np.asarray(bytearray(img.read()), dtype="uint8")
+            image = cv2.imdecode(image, cv2.COLOR_BGR2GRAY)
+            image = cv2.resize(image, img_shape, interpolation=cv2.INTER_AREA)
+
+            img.close()
+
+            if len(os.listdir(training_path)) < 500:
+                plt.imsave(os.path.join(training_path, entry), image)
+            else:
+                plt.imsave(os.path.join(validation_path, entry), image)
+
+            j+=1
+
+        # j+=1         
+        print("Image ", j) 
+
+        if (len(os.listdir(training_path)) + len(os.listdir(validation_path))) == 1000:
+            break
+            
+
+def validationPath(dirname, img_shape=(100, 100)):
+    validation_path = "validation"
+
+    folders = os.listdir(dirname)
+
+    if not os.path.exists(validation_path):
+        os.mkdir(validation_path, 0o777)
+
+    j = 0
+
+    for folder in folders:
+        entries = os.listdir(os.path.join(dirname, folder))
+
+        for entry in entries:
+            img = open(os.path.join(dirname, folder, entry), 'rb')
+            image = np.asarray(bytearray(img.read()), dtype="uint8")
+            image = cv2.imdecode(image, cv2.COLOR_BGR2GRAY)
+            image = cv2.resize(image, img_shape, interpolation=cv2.INTER_AREA)
+
+            img.close()
+
+            plt.imsave(os.path.join(validation_path, entry), image)
+
+        j+=1         
+        print("Image ", j) 
+
+        if j == 100:
+            print("Done")
+            break
+    
 
 if __name__ == '__main__':
     # getData("Images")
-    transfer("lfw")
+    # transfer("lfw")
+    trainingPath("lfw")
