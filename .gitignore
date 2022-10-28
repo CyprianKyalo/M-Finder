@@ -2,8 +2,9 @@ lfw/
 node_modules/
 train/
 train_data/
-dataset/
+dataset/Fabian_Kyalo
 Extracted Faces/
+static/uploads/
 train_set/
 dataset.zip
 

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div>
+    <div>
+        {% for image in images %}
+            <img src="../static/uploads/{{ image }}" alt="">
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

@@ -4,3 +4,20 @@ h1 {
     text-align: center;
     padding: 10px;
 }
+
+#video{
+    display: flex;
+    justify-content: center;
+    width: auto;
+    height: auto;
+}
+
+.flex-container {
+    display: flex;
+}
+
+.flex-container > section {
+    font-size: 20px;
+    margin: 10px;
+    padding: 20px;
+}  
