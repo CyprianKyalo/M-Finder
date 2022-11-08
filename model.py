@@ -1,53 +1,57 @@
-import numpy as np
-from tensorflow.keras.layers import Input, Conv2D, Dense, Flatten,MaxPooling2D
-from tensorflow.keras.layers import Lambda, Subtract
-from tensorflow.keras.models import Model, Sequential
-from tensorflow.keras.regularizers import l2
-from tensorflow.keras import backend as K
-from tensorflow.keras.optimizers import SGD,Adam
-from tensorflow.keras.losses import binary_crossentropy
-from loss import L1Dist
+from tensorflow.keras import metrics
+from tensorflow.keras.models import Model
+from tensorflow.keras.optimizers import Adam
+from siamese_network import siamese_network
+
 import tensorflow as tf
 
-input_shape = (100, 100, 3)
-left_input = Input(input_shape, name="Captured Image")
-right_input = Input(input_shape, name="Comparison Image")
+class SiameseModel(Model):
+    # Builds a Siamese model based on a base-model
+    def __init__(self, siamese_network, margin=1.0):
+        super(SiameseModel, self).__init__()
+        
+        self.margin = margin
+        self.siamese_network = siamese_network
+        self.loss_tracker = metrics.Mean(name="loss")
 
-#build convnet to use in each siamese 'leg'
-convnet = Sequential()
-convnet.add(Conv2D(64,(10,10),activation='relu',input_shape=input_shape,kernel_regularizer=l2(2e-4)))
-convnet.add(MaxPooling2D())
-convnet.add(Conv2D(128,(7,7),activation='relu',
-                  kernel_regularizer=l2(2e-4)))
-convnet.add(MaxPooling2D())
-convnet.add(Conv2D(128,(4,4),activation='relu',kernel_regularizer=l2(2e-4)))
-convnet.add(MaxPooling2D())
-convnet.add(Conv2D(256,(4,4),activation='relu',kernel_regularizer=l2(2e-4)))
-convnet.add(Flatten())
-convnet.add(Dense(4096,activation="sigmoid",kernel_regularizer=l2(1e-3)))
+    def call(self, inputs):
+        return self.siamese_network(inputs)
 
-#encode each of the two inputs into a vector with the convnet
-encoded_l = convnet(left_input)
-encoded_r = convnet(right_input)
+    def train_step(self, data):
+        # GradientTape get the gradients when we compute loss, and uses them to update the weights
+        with tf.GradientTape() as tape:
+          # Compute the loss value
+          loss = self._compute_loss(data)
+            
+        # Compute gradients
+        gradients = tape.gradient(loss, self.siamese_network.trainable_weights)
+        # Update weights
+        self.optimizer.apply_gradients(zip(gradients, self.siamese_network.trainable_weights))
+        # Update metrics (includes the metric that tracks the loss)
+        self.loss_tracker.update_state(loss)
+        return {"loss": self.loss_tracker.result()}
 
-l1 = L1Dist()
-distances = l1.call(encoded_l, encoded_r)
-prediction = Dense(1,activation='sigmoid', name="Dense")(distances)
-SiameseNet = Model(inputs=[left_input,right_input],outputs=prediction, name="Siamese Network")
+    def test_step(self, data):
+        loss = self._compute_loss(data)
+        
+        self.loss_tracker.update_state(loss)
+        return {"loss": self.loss_tracker.result()}
 
-optimizer = Adam(0.00006)
-#//TODO: get layerwise learning rates and momentum annealing scheme described in paperworking
-SiameseNet.compile(loss="binary_crossentropy",optimizer=optimizer)
+    #  The triplet loss is defined as:
+    #  L(A, P, N) = max(‖f(A) - f(P)‖² - ‖f(A) - f(N)‖² + margin, 0)
+    def _compute_loss(self, data):
+        # Get the two distances from the network, then compute the triplet loss
+        ap_distance, an_distance = self.siamese_network(data)
+        loss = tf.maximum(ap_distance - an_distance + self.margin, 0.0)
+        return loss
 
-model = SiameseNet
-model.summary()
+    @property
+    def metrics(self):
+        # We need to list our metrics so the reset_states() can be called automatically.
+        return [self.loss_tracker]
 
-# tf.keras.utils.plot_model(
-#     model,
-#     to_file="model.png",
-#     show_shapes=True,
-#     show_layer_names=True,
-#     rankdir="TB",
-#     expand_nested=True,
-#     dpi=96,
-# )
+
+siamese_model = SiameseModel(siamese_network)
+
+optimizer = Adam(learning_rate=1e-3, epsilon=1e-01)
+siamese_model.compile(optimizer=optimizer)

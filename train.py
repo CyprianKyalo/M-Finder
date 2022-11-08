@@ -1,7 +1,7 @@
 import os
 import tensorflow as tf
 from tensorflow.keras.callbacks import EarlyStopping
-from model import SiameseNet
+from model1 import SiameseNet
 
 def train():
     checkpoint_filepath = 'tmp/checkpoint'
