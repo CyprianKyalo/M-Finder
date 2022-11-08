@@ -1,12 +1,19 @@
-from email import message
 from flask import Flask, render_template, Response, flash, request, redirect, url_for, session
 from werkzeug.utils import secure_filename
 from flask_mysqldb import MySQL
+
+from tensorflow.keras.models import load_model
+from model import SiameseModel
+from utils import verify_predict
 
 import cv2
 import os
 import MySQLdb.cursors
 import re
+
+model_path = "./my_encoder"
+
+model = load_model(model_path, custom_objects={"SiameseModel": SiameseModel})
 
 UPLOAD_FOLDER = 'static/uploads/'
  
@@ -162,6 +169,12 @@ def gen(video):
         ret, jpeg = cv2.imencode('.jpg', image)
 
         frame = jpeg.tobytes()
+
+        if cv2.waitKey(1) & 0xFF == ord('v'):
+            print("Saving Image")
+            cv2.imwrite(os.path.join('static', 'imgs', 'input_image.jpg'), image)
+
+            print("The index is ", verify_predict(model))
         
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
