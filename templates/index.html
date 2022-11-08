@@ -3,9 +3,20 @@
 {% block content %}
     <h1>{% block title %} Welcome to M-Finder {% endblock %}</h1>
 
-    <p>Include your address</p>
-    <span>My oh my</span>
+    <div class="flex-container">
+        <section id="left">
+            <h2>M-Finder</h2>
+            <p>The system that helps you track your loved one.</p>
+        </section>
 
-    <img src="{{ url_for('video_feed') }}" height="80%">
+        <section id="right">
+            <img src="../static/uploads/logo.jpeg" alt="">
+        </section>
+    </div>
+    
+    <!-- <div id="video">
+        <img src="{{ url_for('video_feed') }}" height="100%" id="video">
+    </div> -->
+
 
 {% endblock %}

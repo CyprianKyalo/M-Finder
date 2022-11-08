@@ -6,8 +6,9 @@ my_model/
 node_modules/
 train/
 train_data/
-dataset/
+dataset/Fabian_Kyalo
 Extracted Faces/
+static/uploads/
 train_set/
 weights/
 dataset.zip
