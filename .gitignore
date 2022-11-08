@@ -1,10 +1,15 @@
+Extracted_Faces/
+Extracted Faces1/
 lfw/
+my_encoder/
+my_model/
 node_modules/
 train/
 train_data/
 dataset/
 Extracted Faces/
 train_set/
+weights/
 dataset.zip
 
 __pycache__
