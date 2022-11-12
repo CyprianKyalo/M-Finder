@@ -26,8 +26,8 @@ from tensorflow.keras.models import load_model
 
 images_path = "./static/uploads"
 model_path = "./my_encoder"
-model = 1
-# model = load_model(model_path, custom_objects={"SiameseModel": SiameseModel})
+# model = 1
+model = load_model(model_path, custom_objects={"SiameseModel": SiameseModel})
 
 
 import cv2
@@ -46,19 +46,31 @@ while cap.isOpened():
         cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 3)
         roi_gray = gray[y:y+h, x:x+w]
         roi_color = img[y:y+h, x:x+w]
+
         eyes = eye_cascade.detectMultiScale(roi_gray)
 
         for (ex, ey, ew, eh) in eyes:
             cv2.rectangle(roi_color, (ex, ey), (ex+ew, ey+eh), (0, 255, 0), 5)
 
+            cv2.imwrite("my_image.jpg", img)
+            print("The results is ", verify_predict(model))
+
     # Display the output
     cv2.imshow('img', img)
 
-    if cv2.waitKey(1) & 0xFF == ord('v'):
-        print("Saving Image") 
-        cv2.imwrite("my_image.jpg", img)
-        # print("The index is ", os.listdir(images_path)[verify_predict(model)])
-        print("The results is ", verify_predict(model))
+    # if cv2.waitKey(1) & 0xFF == ord('v'):
+    #     print("Saving Image") 
+    #     cv2.imwrite("my_image.jpg", img)
+    #     # print("The index is ", os.listdir(images_path)[verify_predict(model)])
+    #     print("The results is ", verify_predict(model))
+
+    # cv2.imshow("Faces found", faces)
+
+    # for i in range(0, len(faces)):
+    #     (x, y, w, h) = faces[i]
+    #     cv2.imwrite("Image number {}.jpg".format(i), gray[y:y+w, x:x+h])
+
+
 	
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break

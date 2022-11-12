@@ -98,6 +98,9 @@ def login_post():
         else:
             message = "Wrong Email or Password! Kindly re-enter your credentials."
         return render_template('login.html', message=message)
+    else:
+        message = "There was an error! Please Try again"
+        return render_template('login.html', message=message)
 
 @app.route('/logout')
 def logout():
@@ -155,9 +158,14 @@ def upload_image():
 @app.route('/view_images')
 def view_images():
     # path = "Path to Image storage"
-    path = "C:\\Users\\Cyprian\\Desktop\\IS Project\\M-Finder\\static\\uploads"
-    images = os.listdir(path)
-    return render_template("View_images.html", images=images)
+    # path = "C:\\Users\\Cyprian\\Desktop\\IS Project\\M-Finder\\static\\uploads"
+    # images = os.listdir(path)
+    # return render_template("View_images.html", images=images)
+
+    cursor = mysql.connection.cursor()
+    cursor.execute('SELECT * FROM images')
+    data = cursor.fetchall()
+    return render_template("view_images.html", data=data)
 
 @app.route("/video_url")
 def video_url():

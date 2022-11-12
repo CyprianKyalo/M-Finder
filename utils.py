@@ -13,6 +13,30 @@ path2 = "./Extracted_Faces/Suzanne_Gaudet/Suzanne_Gaudet_001.jpg"
 # ROOT = "./Extracted_Faces"
 images_path = "./static/uploads"
 
+# cascade_path = "./haarcascade_frontalface_default.xml"
+# cascade_model = cv2.CascadeClassifier(cascade_path)
+
+# def extract_face(image):
+#     """ Gets the face from the image passed using Haar-Cascade """
+    
+#     global cascade_model
+    
+#     # Getting co-ordinates of the face
+#     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+#     faces = cascade_model.detectMultiScale(
+#         gray,
+#         scaleFactor=1.4,
+#         minNeighbors=5,
+#         minSize=(32, 32)
+#     )
+    
+#     # Extracts the face from the image and returns it
+#     if len(faces)>0:
+#         x,y,w,h = faces[-1]
+#         image = image[y:y+h,x:x+w]
+#         return image
+#     return None
+
 def read_image(path):
     # path = os.path.join(ROOT, index[0], index[1])
     image = cv2.imread(path)
@@ -20,7 +44,7 @@ def read_image(path):
     image = cv2.resize(image, (128, 128))
     return image
     
-def classify(model, face_list1, face_list2, threshold=1.3):
+def classify(model, face_list1, face_list2, threshold=1.35):
     # Getting the encodings for the passed faces
     tensor1 = model.predict(face_list1)
     tensor2 = model.predict(face_list2)
@@ -34,7 +58,7 @@ def classify(model, face_list1, face_list2, threshold=1.3):
 def verify_predict(model):
     results = []
     # captured_image = os.path.join('static', 'imgs', 'input_image.jpg')
-    captured_image = "my_taken_image.jpg"
+    captured_image = "my_image.jpg"
     captured_image = preprocess_input(read_image(captured_image))
 
     for img in os.listdir(images_path):
@@ -47,8 +71,8 @@ def verify_predict(model):
 
     index = np.argmin(results)
 
-    if index:
-        return index
+    if index and results[index] < 1.3:
+        return results
     return results
     
 

@@ -1,22 +1,5 @@
 {% extends 'base.html' %}
 
-<style>
-    * {
-        padding: 0;
-        margin: 0;
-        box-sizing: border-box;
-    }
-    body {
-        background-color: rgb(219, 226, 226);
-    }
-
-    .row {
-        background: blue;
-        border-radius: 30px;
-        box-shadow: 12px 12px 22px;
-    }
-</style>
-
 {% block content %}
 
 <section class="login py-10 bg-light">
@@ -27,20 +10,23 @@
             </div>
             <div class="col-lg-5 ml-5 align-items-center">
                 <h1 class="py-3 text-dark">Welcome Back</h1>
-                <form action="">
+                <form action="{{ url_for('login_post') }}" method="post">
+                    {% if message is defined and message %}
+                        <div class="alert alert-warning">{{ message }}</div>
+                    {% endif %}
                     <div class="form-row">
                         <div class="offest-1 col-lg-10 pt-5">
-                            <input type="email" class="inp" placeholder="Enter Email">
+                            <input type="email" name="email" class="inp" placeholder="Enter Email">
                         </div>
                     </div>
                     <div class="form-row py-3">
                         <div class="offest-1 col-lg-10">
-                            <input type="password" class="inp" placeholder="Enter Password">
+                            <input type="password" name="password" class="inp" placeholder="Enter Password">
                         </div>
                     </div> 
                     <div class="form-row py-3">
                         <div class="offest-1 col-lg-10">
-                            <button type="button" class="btn1">Login</button>
+                            <button type="submit" class="btn1">Login</button>
                         </div>
                     </div>
                     <a href="#" style="color: blue;">Forgot Password?</a>
