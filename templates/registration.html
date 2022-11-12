@@ -2,12 +2,12 @@
 
 {% block content %}
 
-<div class="container py-3">
+<div class="container py-5">
     <div class="reg row">
         <div class="col-lg-5 reg-img"></div>
         <div class="col-lg-7">
-            <h2 class="text-dark py-3">User Registration</h2>
-            <form action="{{ url_for('register_post') }}" method="post">
+            <h2 class="text-dark py-3 ml-5">User Registration</h2>
+            <form action="{{ url_for('register_post') }}" method="post" class="reg-form ml-5">
                 {% if message is defined and message %}
                     <div class="alert alert-warning">{{ message }}</div>
                 {% endif %}

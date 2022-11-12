@@ -107,12 +107,12 @@ section {
     flex: none;
 }
 
-form input.form-control {
+.form-cont input.form-control {
     margin-bottom: 10px;
     height: 56px;
 }
 
-form .form-control {
+.form-cont .form-control {
     border: transparent;
     border-radius: 0;
     background-color: rgba(0, 0, 0, 0.06);
@@ -201,4 +201,31 @@ form .form-control {
     min-height: 500px;
     border-top-left-radius: 30px;
     border-bottom-left-radius: 30px;
+}
+
+.upload {
+    width: 60%;
+}
+
+.form-upload input.form-control {
+    margin-bottom: 10px;
+    height: 56px;
+}
+
+.form-upload .form-control {
+    border: transparent;
+    border-radius: 0;
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+.reg-form input.form-control {
+    margin-bottom: 10px;
+    height: 40px;
+    width: 90%;
+}
+
+.reg-form .form-control {
+    border: transparent;
+    border-radius: 30px;
+    background-color: rgba(0, 0, 0, 0.06);
 }
