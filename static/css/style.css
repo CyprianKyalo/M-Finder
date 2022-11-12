@@ -1,12 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;700&display=swap');
 
-h1 {
-    /* border: 2px #eee solid; */
-    /* color: brown; */
+/* h1 {
     color: white;
     text-align: center;
     padding: 10px;
-}
+} */
 
 #video{
     display: flex;
@@ -47,8 +45,12 @@ a {
     text-decoration: none;
 }
 
+.navbar {
+    box-shadow: var(--box-shadow);
+}
+
 .navbar .logo {
-    width: 627px;
+    width: 540px;
 }
 
 .navbar .nav-link {
@@ -81,6 +83,55 @@ a {
 }
 
 section {
-    padding-top: 120px;
-    padding-bottom: 120px;
+    padding-top: 60px;
+    padding-bottom: 60px;
+}
+
+.col-img {
+    background-image: url(../uploads/logo.jpeg);
+    background-position: center;
+    background-size: cover;
+    min-height: 500px;
+}
+
+.iconbox {
+    width: 54px;
+    height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--primary);
+    color: #fff;
+    font-size: 32px;
+    border-radius: 100px;
+    flex: none;
+}
+
+form input.form-control {
+    margin-bottom: 10px;
+    height: 56px;
+}
+
+form .form-control {
+    border: transparent;
+    border-radius: 0;
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+.footer-top {
+    padding-bottom: 90px;
+    padding: 90px;
+    background-color: var(--dark);
+}
+
+.footer-top a {
+    color: var(--body);
+}
+
+.footer-top a:hover {
+    color: #fff;
+}
+
+.footer-bottom {
+    background-color: #242933;
 }
