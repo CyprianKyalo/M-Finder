@@ -12,7 +12,6 @@ import MySQLdb.cursors
 import re
 
 model_path = "./my_encoder"
-
 model = load_model(model_path, custom_objects={"SiameseModel": SiameseModel})
 
 UPLOAD_FOLDER = 'static/uploads/'
@@ -29,10 +28,19 @@ app.config['MYSQL_DB'] = 'm_finder'
 
 mysql = MySQL(app)
 
+global capture, switch
+capture = 0
+switch = 1
+
 FILE_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
 video = cv2.VideoCapture(0)
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+
+# def loadModel():
+#     global model
+#     model = load_model(model_path, custom_objects={"SiameseModel": SiameseModel})
+#     print("The model has loaded")
 
 @app.route("/registration")
 def registration():
@@ -151,33 +159,77 @@ def view_images():
     images = os.listdir(path)
     return render_template("View_images.html", images=images)
 
+@app.route("/video_url")
+def video_url():
+    return render_template("video.html")
+
+@app.route('/requests', methods=['POST', 'GET'])
+def tasks():
+    global switch, video
+    if request.form.get('click') == 'Capture':
+        global capture
+        capture = 1
+    elif request.form.get('stop') == 'Stop/Start':
+        if (switch == 1):
+            switch = 0
+            video.release()
+            cv2.destroyAllWindows()
+        else:
+            video = cv2.VideoCapture(0)
+            switch = 1
+
+
+    return render_template("video.html")
+
 # @app.route("/video")
 def gen(video):
+    global capture
     while True:
         success, image = video.read()
-        frame_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        frame_gray = cv2.equalizeHist(frame_gray)
 
-        faces = face_cascade.detectMultiScale(frame_gray)
+        if success:
+            if(capture):
+                capture = 0
+                cv2.imwrite("my_taken_image.jpg", image)
+                print("The index is ", verify_predict(model))
 
-        for (x, y, w, h) in faces:
-            center = (x + w//2, y + h//2)
-            cv2.putText(image, "X: " + str(center[0]) + " Y: " + str(center[1]), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 3)
-            image = cv2.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        try:
+            frame_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            frame_gray = cv2.equalizeHist(frame_gray)
 
-            faceROI = frame_gray[y:y+h, x:x+w]
-        ret, jpeg = cv2.imencode('.jpg', image)
+            faces = face_cascade.detectMultiScale(frame_gray)
 
-        frame = jpeg.tobytes()
+            for (x, y, w, h) in faces:
+                center = (x + w//2, y + h//2)
+                cv2.putText(image, "X: " + str(center[0]) + " Y: " + str(center[1]), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 3)
+                image = cv2.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
-        if cv2.waitKey(1) & 0xFF == ord('v'):
-            print("Saving Image")
-            cv2.imwrite(os.path.join('static', 'imgs', 'input_image.jpg'), image)
+                faceROI = frame_gray[y:y+h, x:x+w]
+            ret, jpeg = cv2.imencode('.jpg', image)
 
-            print("The index is ", verify_predict(model))
+            frame = jpeg.tobytes()
         
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+        # if cv2.waitKey(1) & 0xFF == ord('v'):
+        #     print("Saving Image")
+        #     cv2.imwrite(os.path.join('static', 'imgs', 'input_image.jpg'), image)
+        #     print("The index is ", verify_predict(model))
+
+
+        # if cv2.waitKey(1) & 0xFF == ord('v'):
+        #     print("Saving Image")
+        #     cv2.imwrite(os.path.join('static', 'imgs', 'input_image.jpg'), image)
+
+        #     print("The index is ", verify_predict(model))
+        
+        # try:
+            # ret, jpg = cv2.imencode(".jpg", image)
+            # frame = jpg.tobytes()
+
+            yield (b'--frame\r\n'
+                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
+        except Exception as e:
+            print("The exception is ", e)
 
 @app.route('/video_feed')
 def video_feed():
@@ -192,4 +244,5 @@ def index():
 # video.release()
 
 if __name__ == "__main__":
+    # loadModel()
     app.run(debug=True)

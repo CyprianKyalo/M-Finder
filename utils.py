@@ -17,6 +17,7 @@ def read_image(path):
     # path = os.path.join(ROOT, index[0], index[1])
     image = cv2.imread(path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image = cv2.resize(image, (128, 128))
     return image
     
 def classify(model, face_list1, face_list2, threshold=1.3):
@@ -32,12 +33,13 @@ def classify(model, face_list1, face_list2, threshold=1.3):
 
 def verify_predict(model):
     results = []
-    captured_image = os.path.join('static', 'imgs', 'input_image.jpg')
+    # captured_image = os.path.join('static', 'imgs', 'input_image.jpg')
+    captured_image = "my_taken_image.jpg"
     captured_image = preprocess_input(read_image(captured_image))
 
     for img in os.listdir(images_path):
         print("Now at image ", img)
-        validation_image = preprocess_input(read_image(img))
+        validation_image = preprocess_input(read_image(os.path.join(images_path, img)))
 
         dist, pred = classify(model, np.expand_dims(captured_image, axis=0), np.expand_dims(validation_image, axis=0))
 
@@ -47,10 +49,10 @@ def verify_predict(model):
 
     if index:
         return index
-    return 0
+    return results
     
 
-model = load_model(model_path, custom_objects={"SiameseModel": SiameseModel})
+# model = load_model(model_path, custom_objects={"SiameseModel": SiameseModel})
 
 # print("The predicted output is ", classify_images(model, read_image(path1), read_image(path2)))
 # print("The output is ", classify(model, np.expand_dims(preprocess_input(read_image(path1)), axis=0), np.expand_dims(preprocess_input(read_image(path2)), axis=0)))

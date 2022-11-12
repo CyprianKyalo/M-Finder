@@ -1,9 +1,25 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>{% block title %} Welcome to M-Finder {% endblock %}</h1>
+    <!-- <h1>{% block title %} Welcome to M-Finder {% endblock %}</h1> -->
 
-    <div class="flex-container">
+    <div class="hero vh-100 d-flex align-items-center">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-10 mx-auto text-center">
+                    <h1 class="display-4 text-white">M-Finder</h1>
+                    <p class="text-white">The system that helps you find your loved one</p>
+                    <a href="#" class="btn btn-primary">Get Started</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section id="section">
+
+    </section>
+
+    <!-- <div class="flex-container">
         <section id="left">
             <h2>M-Finder</h2>
             <p>The system that helps you track your loved one.</p>
@@ -12,7 +28,7 @@
         <section id="right">
             <img src="../static/uploads/logo.jpeg" alt="">
         </section>
-    </div>
+    </div> -->
     
     <!-- <div id="video">
         <img src="{{ url_for('video_feed') }}" height="100%" id="video">

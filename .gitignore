@@ -14,4 +14,6 @@ weights/
 dataset.zip
 
 __pycache__
+my_taken_image.jpg
+my_image.jpg
 package-lock.json
