@@ -5,8 +5,9 @@
 <div class="container py-3">
 
 
-<div class="card-columns">
+<div class="card-columns"> 
     {% for record in data %}
+    
     <div class="card">
         <img src="../static/uploads/{{ record[7] }}" alt="" class="card-img-top" width="60px" height="280px">
         <div class="card-body">
@@ -15,9 +16,11 @@
             <h5 class="card-title text-dark">Last Seen at: {{ record[3] }}</h5>
             <h5 class="card-title text-dark">Last Seen in: {{ record[4] }}</h5>
             <h5 class="card-title text-dark">Age: {{ record[5] }}</h5>
+            <h5 class="card-title text-dark">Call: </h5>
+            <h5 class="card-title text-dark">Status: {{ record[8] }}</h5>
             <p class="card-text text-dark">Description: {{ record[6] }}</p>
-            <!-- <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
-            <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p> -->
+            <!-- <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p> -->
+            <p class="card-text"><small class="text-muted">Last updated {{ record[9] }}</small></p>
         </div>
     </div>
     {% endfor %}

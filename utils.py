@@ -13,35 +13,46 @@ path2 = "./Extracted_Faces/Suzanne_Gaudet/Suzanne_Gaudet_001.jpg"
 # ROOT = "./Extracted_Faces"
 images_path = "./static/uploads"
 
-# cascade_path = "./haarcascade_frontalface_default.xml"
-# cascade_model = cv2.CascadeClassifier(cascade_path)
+cascade_path = "./haarcascade_frontalface_default.xml"
+cascade_model = cv2.CascadeClassifier(cascade_path)
 
-# def extract_face(image):
-#     """ Gets the face from the image passed using Haar-Cascade """
+def extract_face(image):
+    """ Gets the face from the image passed using Haar-Cascade """
     
-#     global cascade_model
+    global cascade_model
     
-#     # Getting co-ordinates of the face
-#     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-#     faces = cascade_model.detectMultiScale(
-#         gray,
-#         scaleFactor=1.4,
-#         minNeighbors=5,
-#         minSize=(32, 32)
-#     )
+    # Getting co-ordinates of the face
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # faces = cascade_model.detectMultiScale(
+    #     gray,
+    #     scaleFactor=1.4,
+    #     minNeighbors=5,
+    #     minSize=(32, 32)
+    # )
+    faces = cascade_model.detectMultiScale(gray, 1.1, 4)
     
-#     # Extracts the face from the image and returns it
-#     if len(faces)>0:
-#         x,y,w,h = faces[-1]
-#         image = image[y:y+h,x:x+w]
-#         return image
-#     return None
+    # Extracts the face from the image and returns it
+    if len(faces)>0:
+        x,y,w,h = faces[-1]
+        image = image[y:y+h,x:x+w]
+        return image
+    return None
 
 def read_image(path):
     # path = os.path.join(ROOT, index[0], index[1])
     image = cv2.imread(path)
+    # 
+    # if image is None:
+    #     print("No image found")
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    # image = extract_face(image)
     image = cv2.resize(image, (128, 128))
+
+    
+    # cv2.imwrite("Read_image.jpg", image)
+    # if image is None:
+    #     print("Nothing")
+    # print("image")
     return image
     
 def classify(model, face_list1, face_list2, threshold=1.35):
@@ -72,9 +83,11 @@ def verify_predict(model):
     index = np.argmin(results)
 
     if index and results[index] < 1.3:
-        return results
+        return index
     return results
     
+
+# read_image("my_image.jpg")
 
 # model = load_model(model_path, custom_objects={"SiameseModel": SiameseModel})
 

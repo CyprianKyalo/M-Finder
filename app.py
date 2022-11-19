@@ -1,6 +1,7 @@
 from flask import Flask, render_template, Response, flash, request, redirect, url_for, session
 from werkzeug.utils import secure_filename
 from flask_mysqldb import MySQL
+from datetime import datetime
 
 from tensorflow.keras.models import load_model
 from model import SiameseModel
@@ -144,9 +145,13 @@ def upload_image():
         location = request.form['last_seen_location']
         age = request.form['age']
         description  = request.form['description']
+        phone = request.form['phone']
+        status = "Not Found"
+        updated_at = datetime.now()
+
 
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('INSERT INTO images VALUES (NULL, % s, % s, % s, % s, % s, % s, % s)', (userID, name, time, location, age, description, filename, ))
+        cursor.execute('INSERT INTO images VALUES (NULL, % s, % s, % s, % s, % s, % s, % s, % s, % s, % s)', (userID, name, time, location, age, description, phone, filename, status, updated_at, ))
         mysql.connection.commit()
 
         flash("Image successfully uploaded")

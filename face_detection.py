@@ -49,14 +49,18 @@ while cap.isOpened():
 
         eyes = eye_cascade.detectMultiScale(roi_gray)
 
-        for (ex, ey, ew, eh) in eyes:
-            cv2.rectangle(roi_color, (ex, ey), (ex+ew, ey+eh), (0, 255, 0), 5)
+        # for (ex, ey, ew, eh) in eyes:
+            # cv2.rectangle(roi_color, (ex, ey), (ex+ew, ey+eh), (0, 255, 0), 5)
 
-            cv2.imwrite("my_image.jpg", img)
-            print("The results is ", verify_predict(model))
+        cv2.imwrite("my_image.jpg", img)
+        print("The results is ", verify_predict(model))
+
+
+            # break
 
     # Display the output
     cv2.imshow('img', img)
+
 
     # if cv2.waitKey(1) & 0xFF == ord('v'):
     #     print("Saving Image") 
