@@ -4,6 +4,7 @@ lfw/
 my_encoder/
 my_model/
 node_modules/
+static/uploads/
 train/
 train_data/
 dataset/Fabian_Kyalo
@@ -17,3 +18,19 @@ __pycache__
 my_taken_image.jpg
 my_image.jpg
 package-lock.json
+
+
+env_mfinder/
+
+*.pyc
+.env
+instance/
+tests/
+
+.pytest_cache/
+.coverage
+htmlcov/
+
+dist/
+build/
+*.egg-info/

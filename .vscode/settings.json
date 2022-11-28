@@ -29,5 +29,7 @@
         "env.bak{,/**}",
         "venv.bak{,/**}",
         ".vscode{,/**}"
-    ]
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/f74d5c2a-c798-4422-8137-34f6285e0751/AppServices/subscriptions/f74d5c2a-c798-4422-8137-34f6285e0751/resourceGroups/Face_Recognition/providers/Microsoft.Web/sites/mfinder",
+    "appService.deploySubpath": "."
 }

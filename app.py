@@ -1,5 +1,6 @@
 from flask import Flask, render_template, Response, flash, request, redirect, url_for, session
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mysqldb import MySQL
 from datetime import datetime
 
@@ -13,7 +14,7 @@ import MySQLdb.cursors
 import re
 
 model_path = "./my_encoder"
-model = load_model(model_path, custom_objects={"SiameseModel": SiameseModel})
+# model = load_model(model_path, custom_objects={"SiameseModel": SiameseModel})
 
 UPLOAD_FOLDER = 'static/uploads/'
  
@@ -26,6 +27,7 @@ app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'm_finder'
+app.config['TESTING'] = True
 
 mysql = MySQL(app)
 
@@ -68,8 +70,9 @@ def register_post():
         elif not name or not email or not password:
             message = "Please fill in the whole form!!"
         else:
-            cursor.execute('INSERT INTO user VALUES (NULL, % s, % s, % s, % s, % s)', (name, location, contact, email, password, ))
+            cursor.execute('INSERT INTO user VALUES (NULL, % s, % s, % s, % s, % s)', (name, location, contact, email, generate_password_hash(password), ))
             mysql.connection.commit()
+            cursor.close()
             message = "You have successfully registered! Please proceed to log in."
     elif request.method == "POST":
         message = "Please fill in the form!!"
@@ -85,20 +88,40 @@ def login_post():
     if request.method == "POST" and "email" in request.form and "password" in request.form:
         email = request.form['email']
         password = request.form['password']
+
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM user WHERE email = %s AND password = %s', (email, password, ))
-        
-        user = cursor.fetchone()
-        if user:
+
+        user = cursor.execute('SELECT * FROM user WHERE email = %s', (email, )).fetchone()
+
+        if user is None:
+            message = "Wrong Email or Password! Kindly re-enter your credentials."
+        elif not check_password_hash(user['password'], password):
+            message = "Wrong Email or Password! Kindly re-enter your credentials."
+        else:
             session['loggedin'] = True
             session['userID'] = user['userID']
             session['name'] = user['name']
             session['email'] = user['email']
             message = 'You have successfully logged in!!'
+            cursor.close()
             return render_template("index.html", message=message)
-        else:
-            message = "Wrong Email or Password! Kindly re-enter your credentials."
+        # flash(message)
         return render_template('login.html', message=message)
+
+
+        # cursor.execute('SELECT * FROM user WHERE email = %s AND password = %s', (email, password, ))
+        
+        # user = cursor.fetchone()
+        # if user:
+        #     session['loggedin'] = True
+        #     session['userID'] = user['userID']
+        #     session['name'] = user['name']
+        #     session['email'] = user['email']
+        #     message = 'You have successfully logged in!!'
+        #     return render_template("index.html", message=message)
+        # else:
+        #     message = "Wrong Email or Password! Kindly re-enter your credentials."
+        # return render_template('login.html', message=message)
     else:
         message = "There was an error! Please Try again"
         return render_template('login.html', message=message)
@@ -108,6 +131,7 @@ def logout():
     session.pop('loggedin', None)
     session.pop('userID', None)
     session.pop('email', None)
+    session.clear()
     return redirect(url_for('login'))
 
 @app.route("/upload_image")
@@ -153,6 +177,7 @@ def upload_image():
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('INSERT INTO images VALUES (NULL, % s, % s, % s, % s, % s, % s, % s, % s, % s, % s)', (userID, name, time, location, age, description, phone, filename, status, updated_at, ))
         mysql.connection.commit()
+        cursor.close()
 
         flash("Image successfully uploaded")
         return render_template("upload_image.html", filename=filename)
@@ -170,6 +195,7 @@ def view_images():
     cursor = mysql.connection.cursor()
     cursor.execute('SELECT * FROM images')
     data = cursor.fetchall()
+    cursor.close()
     return render_template("view_images.html", data=data)
 
 @app.route("/video_url")
@@ -249,6 +275,30 @@ def video_feed():
     global video
     return Response(gen(video),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def update_images_table(index):
+    img_name = os.listdir(UPLOAD_FOLDER)[index]
+
+    try:
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+        img = cur.execute('SELECT * FROM images WHERE image_name = %s', (img_name, )).fetchone()
+
+        if img is not None and img['status'] == "Not Found":
+            cur.execute("Update images SET temp_status = %s, updated_at = %s WHERE image_name = %s", (1, datetime.now(), img_name, ))
+            mysql.connection.commit()
+            cur.close()
+            return "Temporary Status updated successfully"
+        else:
+            return "Image Not Found"
+
+    except:
+        print("Connection failed to establish!!Please Try again.")
+        
+
+@app.route('/found')
+def found():
+    return render_template('found.html')
 
 @app.route("/")
 def index():

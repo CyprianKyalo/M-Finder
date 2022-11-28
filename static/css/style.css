@@ -64,7 +64,7 @@ a {
 }
 
 .hero {
-    background-image: url(../uploads/default.jpeg);
+    background-image: url(../static_images/default.jpeg);
     background-position: center;
     background-size: cover;
     background-attachment: fixed;
@@ -88,7 +88,7 @@ section {
 }
 
 .col-img {
-    background-image: url(../uploads/logo.jpeg);
+    background-image: url(../static_images/logo.jpeg);
     background-position: center;
     background-size: cover;
     min-height: 500px;
@@ -195,7 +195,7 @@ section {
 }
 
 .reg-img {
-    background-image: url(../uploads/bg1.jpeg);
+    background-image: url(../static_images/bg1.jpeg);
     background-position: center;
     background-size: cover;
     min-height: 500px;

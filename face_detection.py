@@ -23,6 +23,7 @@
 from model import SiameseModel
 from utils import verify_predict
 from tensorflow.keras.models import load_model
+from app import update_images_table
 
 images_path = "./static/uploads"
 model_path = "./my_encoder"
@@ -53,7 +54,14 @@ while cap.isOpened():
             # cv2.rectangle(roi_color, (ex, ey), (ex+ew, ey+eh), (0, 255, 0), 5)
 
         cv2.imwrite("my_image.jpg", img)
-        print("The results is ", verify_predict(model))
+        result = verify_predict(model)
+
+        if result is not None:
+            print(update_images_table(result))
+        else:
+            print("No match found")
+
+        # print("The results is ", verify_predict(model))
 
 
             # break
