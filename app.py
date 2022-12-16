@@ -10,8 +10,10 @@ from utils import verify_predict
 
 import cv2
 import os
-import MySQLdb.cursors
+import MySQLdb
 import re
+
+import psycopg2
 
 model_path = "./my_encoder"
 # model = load_model(model_path, custom_objects={"SiameseModel": SiameseModel})
@@ -19,17 +21,29 @@ model_path = "./my_encoder"
 UPLOAD_FOLDER = 'static/uploads/'
  
 app = Flask(__name__)
-app.secret_key = "secret key"
+
+# app.secret_key = "secret key"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'm_finder'
-app.config['TESTING'] = True
+app.config['MYSQL_DB'] = 'mfinder'
+# app.config['TESTING'] = True
+# app.config['MYSQL_DATABASE_USER'] = 'root'
+# app.config['MYSQL_DATABASE_PASSWORD'] = ''
+# app.config['MYSQL_DATABASE_DB'] = 'm_finder'
+# app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 
-mysql = MySQL(app)
+# mysql = MySQL(app)
+# # mysql.init_app(app)
+# with app.app_context():
+#     cur = mysql.connection.cursor()
+
+
+conn = psycopg2.connect(dbname="mfinder", user="postgres", password="root")
+cursor = conn.cursor()
 
 global capture, switch
 capture = 0
@@ -45,6 +59,19 @@ face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 #     model = load_model(model_path, custom_objects={"SiameseModel": SiameseModel})
 #     print("The model has loaded")
 
+def get_connection():
+    try:
+        db_connection = MySQLdb.connect("localhost", 'root', '', 'm_finder')
+    except Exception as e:
+        print("Can't connect to the database")
+        return 0
+
+    return db_connection
+
+def close_connection(db_connection):
+    db_connection.close()
+
+
 @app.route("/registration")
 def registration():
     return render_template("registration.html")
@@ -59,7 +86,7 @@ def register_post():
         location = request.form['location']
         contact = request.form['contact']
 
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        # cursor = mysql.connection.cursor()
         cursor.execute("SELECT * FROM user WHERE email = %s", (email, ))
         account = cursor.fetchone()
 
@@ -72,7 +99,7 @@ def register_post():
         else:
             cursor.execute('INSERT INTO user VALUES (NULL, % s, % s, % s, % s, % s)', (name, location, contact, email, generate_password_hash(password), ))
             mysql.connection.commit()
-            cursor.close()
+            # cursor.close()
             message = "You have successfully registered! Please proceed to log in."
     elif request.method == "POST":
         message = "Please fill in the form!!"
@@ -89,7 +116,7 @@ def login_post():
         email = request.form['email']
         password = request.form['password']
 
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        # cursor = mysql.connection.cursor()
 
         user = cursor.execute('SELECT * FROM user WHERE email = %s', (email, )).fetchone()
 
@@ -103,7 +130,7 @@ def login_post():
             session['name'] = user['name']
             session['email'] = user['email']
             message = 'You have successfully logged in!!'
-            cursor.close()
+            # cursor.close()
             return render_template("index.html", message=message)
         # flash(message)
         return render_template('login.html', message=message)
@@ -174,10 +201,10 @@ def upload_image():
         updated_at = datetime.now()
 
 
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        # cursor = mysql.connection.cursor()
         cursor.execute('INSERT INTO images VALUES (NULL, % s, % s, % s, % s, % s, % s, % s, % s, % s, % s)', (userID, name, time, location, age, description, phone, filename, status, updated_at, ))
         mysql.connection.commit()
-        cursor.close()
+        # cursor.close()
 
         flash("Image successfully uploaded")
         return render_template("upload_image.html", filename=filename)
@@ -192,10 +219,11 @@ def view_images():
     # images = os.listdir(path)
     # return render_template("View_images.html", images=images)
 
-    cursor = mysql.connection.cursor()
+    # cursor = mysql.connection.cursor()
     cursor.execute('SELECT * FROM images')
     data = cursor.fetchall()
-    cursor.close()
+    print(data)
+    # cursor.close()
     return render_template("view_images.html", data=data)
 
 @app.route("/video_url")
@@ -279,21 +307,67 @@ def video_feed():
 def update_images_table(index):
     img_name = os.listdir(UPLOAD_FOLDER)[index]
 
-    try:
-        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    # print("The connection is ", get_connection().cursor())
 
-        img = cur.execute('SELECT * FROM images WHERE image_name = %s', (img_name, )).fetchone()
+    # try:
+    #     db_connection = MySQLdb.connect("localhost", 'root', '', 'm_finder')
+    # except Exception as e:
+    #     print("Can't connect to the database")
+    #     return 0
+    # # cur = mysql.connection.cursor()
 
-        if img is not None and img['status'] == "Not Found":
-            cur.execute("Update images SET temp_status = %s, updated_at = %s WHERE image_name = %s", (1, datetime.now(), img_name, ))
-            mysql.connection.commit()
-            cur.close()
-            return "Temporary Status updated successfully"
-        else:
-            return "Image Not Found"
+    # # try:
+    #     # db_connection = get_connection()
+    # cur = db_connection.cursor()
+    #     # cur = mysql.config  nnection.cursor()
+    print("The cur is ", cur)
 
-    except:
-        print("Connection failed to establish!!Please Try again.")
+
+    print("Pssed first test")
+
+    # cur = mysql.connection.cursor()
+    print("The img nme is ", img_name)
+
+    cur.execute('SELECT * FROM images')
+    img = cur.fetchall()
+
+    # try:
+    # img = cur.execute("SELECT * from user")
+    # except MySQLdb.OperationalError as e:
+    #     (error_code, msg) = e.args
+    #     print("Errors ",error_code, msg)
+        # plugin already loaded, nothing to do.
+        # if error_code != MYSQL_ERROR_FUNCTION_EXISTS:
+        #     raise
+    # img = cur.execute('SELECT name FROM images WHERE image_name = "my_image1.jpg";').fetchone()
+
+    # img = cur.execute('SELECT * FROM images').fetchall()
+    # cursor.execute('SELECT * FROM images')
+# data = cursor.fetchall()
+    print("Pssed here too")
+
+    # img = cur.execute('SELECT * FROM images WHERE image_name = "my_image1.jpg"')
+
+    if img:
+        print(img)
+        # print("Img ststus is ", img['status'])
+    else:
+        print("No such image here")
+
+    print("Pssed second test")
+
+
+    if img and img['status'] == "Not Found":
+        cur.execute("Update images SET temp_status = %s, updated_at = %s WHERE image_name = %s", (1, datetime.now(), img_name, ))
+        mysql.connection.commit()
+        cur.close()
+        return "Temporary Status updated successfully"
+    else:
+        cur.close()
+        return "Image Not Found"
+
+# except:
+    #     print("Connection failed to establish!!Please Try again.")
         
 
 @app.route('/found')
