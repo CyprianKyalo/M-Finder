@@ -4,7 +4,7 @@ def test_login_post(client):
 	url = "/login_post"
 
 	mock_request_data = {
-		"email": "test@gm.com",
+		"email": "test@mfinder.com",
 		"password": "password"
 	}
 
