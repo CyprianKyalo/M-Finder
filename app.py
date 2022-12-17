@@ -1,28 +1,28 @@
 from flask import Flask, render_template, Response, flash, request, redirect, url_for, session
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_mysqldb import MySQL
+# from flask_mysqldb import MySQL
 from datetime import datetime
 
 from tensorflow.keras.models import load_model
 from model import SiameseModel
-from utils import verify_predict
+from utils import verify_predict, extract_face
 
 import cv2
 import os
-import MySQLdb
+# import MySQLdb
 import re
 
 import psycopg2
 
 model_path = "./my_encoder"
-# model = load_model(model_path, custom_objects={"SiameseModel": SiameseModel})
+model = load_model(model_path, custom_objects={"SiameseModel": SiameseModel})
 
 UPLOAD_FOLDER = 'static/uploads/'
  
 app = Flask(__name__)
 
-# app.secret_key = "secret key"
+app.secret_key = "secret key"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
@@ -42,7 +42,7 @@ app.config['MYSQL_DB'] = 'mfinder'
 #     cur = mysql.connection.cursor()
 
 
-conn = psycopg2.connect(dbname="mfinder", user="postgres", password="root")
+conn = psycopg2.connect(dbname="m_finder", user="postgres", password="root", host="localhost")
 cursor = conn.cursor()
 
 global capture, switch
@@ -87,8 +87,11 @@ def register_post():
         contact = request.form['contact']
 
         # cursor = mysql.connection.cursor()
-        cursor.execute("SELECT * FROM user WHERE email = %s", (email, ))
-        account = cursor.fetchone()
+        try:
+            cursor.execute("SELECT * FROM users WHERE email = %s", (email, ))
+            account = cursor.fetchone()
+        except:
+            conn.rollback()
 
         if account:
             message = "The account already exists! Please log in."
@@ -97,9 +100,16 @@ def register_post():
         elif not name or not email or not password:
             message = "Please fill in the whole form!!"
         else:
-            cursor.execute('INSERT INTO user VALUES (NULL, % s, % s, % s, % s, % s)', (name, location, contact, email, generate_password_hash(password), ))
-            mysql.connection.commit()
+            query = "INSERT INTO users (name, location, contact, email, password) VALUES (%s, %s, %s, %s, %s)"
+            values = (name, location, contact, email, generate_password_hash(password))
+
+            cursor.execute(query, values)
+            # Commit the changes to the database
+            cursor.execute("COMMIT")
+            # cursor.execute('INSERT INTO users VALUES (NULL, % s, % s, % s, % s, % s)', (name, location, contact, email, generate_password_hash(password), ))
+            # mysql.connection.commit()
             # cursor.close()
+            print(values)
             message = "You have successfully registered! Please proceed to log in."
     elif request.method == "POST":
         message = "Please fill in the form!!"
@@ -117,21 +127,38 @@ def login_post():
         password = request.form['password']
 
         # cursor = mysql.connection.cursor()
+        # try:
+        #     query = 'SELECT * FROM users WHERE email = %s'
+        #     value = (email)
+        #     print("Vlue is ", query, value)
+        #     print("Execution ", cursor.execute(query, value))
+        #     user = cursor.fetchone()
+        #     print("User is ", user)
+        #     # user = cursor.execute('SELECT * FROM users WHERE email = %s', (email, )).fetchone()
+        # except:
+        #     message = "No user Exists"
+        #     conn.rollback()
+            # return render_template('login.html', message=message)
+        try:
+            cursor.execute("SELECT * FROM users WHERE email = %s", (email, ))
+            user = cursor.fetchone()
+        except:
+            conn.rollback()
 
-        user = cursor.execute('SELECT * FROM user WHERE email = %s', (email, )).fetchone()
-
-        if user is None:
+        if not user:
             message = "Wrong Email or Password! Kindly re-enter your credentials."
-        elif not check_password_hash(user['password'], password):
-            message = "Wrong Email or Password! Kindly re-enter your credentials."
+            
+        elif not check_password_hash(user[5], password):
+            message = "Wrong Password! Kindly re-enter your credentials."
         else:
             session['loggedin'] = True
-            session['userID'] = user['userID']
-            session['name'] = user['name']
-            session['email'] = user['email']
+            session['userID'] = user[0]
+            session['name'] = user[1]
+            session['email'] = user[4]
             message = 'You have successfully logged in!!'
             # cursor.close()
             return render_template("index.html", message=message)
+            
         # flash(message)
         return render_template('login.html', message=message)
 
@@ -200,11 +227,18 @@ def upload_image():
         status = "Not Found"
         updated_at = datetime.now()
 
+        print("Userid is", userID)
 
+        query = "INSERT INTO images (userid, name, time, location, age, description, phone, filename, status, updated_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        # "INSERT INTO users (name, location, contact, email, password) VALUES (%s, %s, %s, %s, %s)"
+        values = (userID, name, time, location, age, description, phone, filename, status, updated_at)
         # cursor = mysql.connection.cursor()
-        cursor.execute('INSERT INTO images VALUES (NULL, % s, % s, % s, % s, % s, % s, % s, % s, % s, % s)', (userID, name, time, location, age, description, phone, filename, status, updated_at, ))
-        mysql.connection.commit()
+        # cursor.execute('INSERT INTO images VALUES (NULL, % s, % s, % s, % s, % s, % s, % s, % s, % s, % s)', (userID, name, time, location, age, description, phone, filename, status, updated_at, ))
+        # mysql.connection.commit()
         # cursor.close()
+        cursor.execute(query, values)
+
+        cursor.execute("COMMIT")
 
         flash("Image successfully uploaded")
         return render_template("upload_image.html", filename=filename)
@@ -222,7 +256,7 @@ def view_images():
     # cursor = mysql.connection.cursor()
     cursor.execute('SELECT * FROM images')
     data = cursor.fetchall()
-    print(data)
+    # print(data)
     # cursor.close()
     return render_template("view_images.html", data=data)
 
@@ -257,8 +291,13 @@ def gen(video):
         if success:
             if(capture):
                 capture = 0
-                cv2.imwrite("my_taken_image.jpg", image)
-                print("The index is ", verify_predict(model))
+                # cv2.imwrite("my_taken_image.jpg", image)
+                idx = verify_predict(model)
+                print("The index is ", idx)
+                # if idx:
+                #     update_images_table(idx)
+                # else:
+                #     print("Image not found")
 
         try:
             frame_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -270,6 +309,9 @@ def gen(video):
                 center = (x + w//2, y + h//2)
                 cv2.putText(image, "X: " + str(center[0]) + " Y: " + str(center[1]), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 3)
                 image = cv2.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0), 2)
+
+                cv2.imwrite("my_taken_image.jpg", image)
+                cv2.imwrite("my_image.jpg", image)
 
                 faceROI = frame_gray[y:y+h, x:x+w]
             ret, jpeg = cv2.imencode('.jpg', image)
@@ -320,7 +362,7 @@ def update_images_table(index):
     #     # db_connection = get_connection()
     # cur = db_connection.cursor()
     #     # cur = mysql.config  nnection.cursor()
-    print("The cur is ", cur)
+    # print("The cur is ", cur)
 
 
     print("Pssed first test")
@@ -328,8 +370,8 @@ def update_images_table(index):
     # cur = mysql.connection.cursor()
     print("The img nme is ", img_name)
 
-    cur.execute('SELECT * FROM images')
-    img = cur.fetchall()
+    # cur.execute('SELECT * FROM images')
+    # img = cur.fetchall()
 
     # try:
     # img = cur.execute("SELECT * from user")
@@ -339,7 +381,10 @@ def update_images_table(index):
         # plugin already loaded, nothing to do.
         # if error_code != MYSQL_ERROR_FUNCTION_EXISTS:
         #     raise
-    # img = cur.execute('SELECT name FROM images WHERE image_name = "my_image1.jpg";').fetchone()
+    cursor.execute("SELECT * FROM images WHERE filename = 'my_image1.jpg'")
+    img = cursor.fetchone()
+
+    # img = cursor.execute("SELECT * FROM images WHERE filename = 'my_image1.jpg'").fetchone()
 
     # img = cur.execute('SELECT * FROM images').fetchall()
     # cursor.execute('SELECT * FROM images')
@@ -349,7 +394,7 @@ def update_images_table(index):
     # img = cur.execute('SELECT * FROM images WHERE image_name = "my_image1.jpg"')
 
     if img:
-        print(img)
+        print("The img is", img)
         # print("Img ststus is ", img['status'])
     else:
         print("No such image here")
@@ -357,10 +402,12 @@ def update_images_table(index):
     print("Pssed second test")
 
 
-    if img and img['status'] == "Not Found":
-        cur.execute("Update images SET temp_status = %s, updated_at = %s WHERE image_name = %s", (1, datetime.now(), img_name, ))
-        mysql.connection.commit()
-        cur.close()
+    if img and img[9] == "Not Found":
+        print("Passed through here")
+        cursor.execute("Update images SET temp_status = %s, updated_at = %s WHERE filename = %s", (1, datetime.now(), img_name, ))
+        # mysql.connection.commit()
+        # cur.close()
+        cursor.execute("COMMIT")
         return "Temporary Status updated successfully"
     else:
         cur.close()

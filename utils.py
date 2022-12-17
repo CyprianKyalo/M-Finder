@@ -20,6 +20,10 @@ def extract_face(image):
     """ Gets the face from the image passed using Haar-Cascade """
     
     global cascade_model
+    # ROOT = "./"
+    # path = os.path.join(ROOT, image)
+
+    # image = cv2.imread(image)
     
     # Getting co-ordinates of the face
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -69,7 +73,8 @@ def classify(model, face_list1, face_list2, threshold=1.35):
 def verify_predict(model):
     results = []
     # captured_image = os.path.join('static', 'imgs', 'input_image.jpg')
-    captured_image = "my_image.jpg"
+    captured_image = "my_taken_image.jpg"
+    # print(extract_face(captured_image))
     captured_image = preprocess_input(read_image(captured_image))
 
     for img in os.listdir(images_path):
@@ -82,9 +87,9 @@ def verify_predict(model):
 
     index = np.argmin(results)
 
-    if index and results[index] < 1.3:
+    if index and results[index] < 1.5:
         return index
-    return None
+    return results
     
 
 # read_image("my_image.jpg")

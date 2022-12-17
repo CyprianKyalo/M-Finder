@@ -21,9 +21,13 @@ package-lock.json
 
 
 env_mfinder/
+venv/
 
 *.pyc
 .env
+.vscode/
+.github/
+.deployment
 instance/
 tests/
 
