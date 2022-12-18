@@ -50,7 +50,7 @@ a {
 }
 
 .navbar .logo {
-    width: 540px;
+    width: 420px;
 }
 
 .navbar .nav-link {
@@ -228,4 +228,27 @@ section {
     border: transparent;
     border-radius: 30px;
     background-color: rgba(0, 0, 0, 0.06);
+}
+
+.search-box{
+/*    background: #c1c1c1;*/
+/*    border: 1px solid #ababab;*/
+/*    padding: 3%;*/
+    width: 40%;
+    margin-left: 69%;
+}
+
+.search-box input:focus{
+    box-shadow:none;
+    border:2px solid #eeeeee;
+}
+.search-list{
+    background: #fff;
+    border: 1px solid #ababab;
+    border-top: none;
+}
+.search-list h3{
+    background: #eee;
+    padding: 3%;color:#fe6f41;
+    margin-bottom: 0%;
 }

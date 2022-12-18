@@ -2,37 +2,47 @@
 
 {% block content %}
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function(){
+    load_data();
+    function load_data(query)
+    {
+      $.ajax({
+        url:"/livesearch",
+        method:"POST",
+        data:{query:query},
+        success:function(data)
+        {
+          $('#result').html(data);
+          $("#result").append(data.htmlresponse);
+        }
+      });
+    }
+    $('#search_text').keyup(function(){
+      var search = $(this).val();
+      if(search != ''){
+        load_data(search);
+      }else{
+        load_data();
+      }
+    });
+  });
+</script>
+
 <div class="container py-3">
 
-
-<div class="card-columns"> 
-    {% for record in data %}
-    
-    <div class="card">
-        <img src="../static/uploads/{{ record[8] }}" alt="" class="card-img-top" width="60px" height="280px">
-        <div class="card-body">
-            <h4 class="card-title text-dark">Name: {{ record[2] }}</h4>
-
-            <h5 class="card-title text-dark">Last Seen at: {{ record[3] }}</h5>
-            <h5 class="card-title text-dark">Last Seen in: {{ record[4] }}</h5>
-            <h5 class="card-title text-dark">Age: {{ record[5] }}</h5>
-            <h5 class="card-title text-dark">Call: </h5>
-            <h5 class="card-title text-dark">Status: {{ record[8] }}</h5>
-            <p class="card-text text-dark">Description: {{ record[6] }}</p>
-            <!-- <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p> -->
-            <p class="card-text"><small class="text-muted">Last updated {{ record[9] }}</small></p>
-        </div>
+<div class="search-box">
+    <div class="row">
+        
+        <div class="col-md-9">
+            <input type="text" name="search_text" id="search_text" class="form-control" placeholder="Search by name, phone, or location">
+        </div> 
     </div>
-    {% endfor %}
-</div>
 </div>
 
-<!-- <div>
-    <div>
-        {% for image in images %}
-            <img src="../static/uploads/{{ image }}" alt="">
-        {% endfor %}
-    </div>
-</div> -->
+<div id="result"></div>
+
+</div>
 
 {% endblock %}

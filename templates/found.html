@@ -12,17 +12,21 @@
 				<th>Name</th>
 				<th>Location</th>
 				<th>Date</th>
+				<th>Confirm</th>
+				<th>Deny</th>
 			</tr>
 		</thead>
 		<tbody>
+			{% for record in data %}
 			<tr>
-				<th scope="row">1</th>
-				<th></th>
-				<th></th>
-				<th></th>
-				<th></th>
-				<th></th>
+				<th scope="row">{{ record[0] }}</th>
+				<th><img src="../static/uploads/{{ record[8] }}" alt="" class="card-img-top" width="50px" height="100px"></th>
+				<th>{{ record[1] }}</th>
+				<th>{{ record[2] }}</th>
+				<th><a href="#">{{ record[12] }}</a></th>
+				<th>{{ record[10].strftime('%Y-%m-%d') }}</th>
 			</tr>
+			{% endfor %}
 		</tbody>
 	</table>
 </div>

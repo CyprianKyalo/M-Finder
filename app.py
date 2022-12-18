@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Response, flash, request, redirect, url_for, session
+from flask import Flask, render_template, Response, flash, request, redirect, url_for, session, jsonify
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 # from flask_mysqldb import MySQL
@@ -7,6 +7,7 @@ from datetime import datetime
 from tensorflow.keras.models import load_model
 from model import SiameseModel
 from utils import verify_predict, extract_face
+from location import get_location
 
 import cv2
 import os
@@ -260,6 +261,25 @@ def view_images():
     # cursor.close()
     return render_template("view_images.html", data=data)
 
+@app.route("/livesearch", methods=["POST", "GET"])
+def livesearch():
+    if request.method == 'POST':
+        print("Here pssing")
+        search_word = request.form.get('query')
+        print("Word is ", search_word)
+        if search_word is None:
+            query = "SELECT * from images"
+            cursor.execute(query)
+            data = cursor.fetchall()
+        else:    
+            query = "SELECT * from images WHERE name ILIKE '%{}%' OR phone ILIKE '%{}%' OR location ILIKE '%{}%'".format(search_word,search_word,search_word)
+            cursor.execute(query)
+            print("Query is ", query)
+            data = cursor.fetchall()
+            print("Data is ", data)
+    return jsonify({'htmlresponse': render_template('response.html', data=data)})
+
+
 @app.route("/video_url")
 def video_url():
     return render_template("video.html")
@@ -294,10 +314,11 @@ def gen(video):
                 # cv2.imwrite("my_taken_image.jpg", image)
                 idx = verify_predict(model)
                 print("The index is ", idx)
-                # if idx:
-                #     update_images_table(idx)
-                # else:
-                #     print("Image not found")
+                if idx:
+                    update_images_table(idx)
+                    print("Image Updated")
+                else:
+                    print("Image not found")
 
         try:
             frame_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -311,7 +332,7 @@ def gen(video):
                 image = cv2.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
                 cv2.imwrite("my_taken_image.jpg", image)
-                cv2.imwrite("my_image.jpg", image)
+                # cv2.imwrite("my_image.jpg", image)
 
                 faceROI = frame_gray[y:y+h, x:x+w]
             ret, jpeg = cv2.imencode('.jpg', image)
@@ -349,83 +370,62 @@ def video_feed():
 def update_images_table(index):
     img_name = os.listdir(UPLOAD_FOLDER)[index]
 
-    # print("The connection is ", get_connection().cursor())
-
-    # try:
-    #     db_connection = MySQLdb.connect("localhost", 'root', '', 'm_finder')
-    # except Exception as e:
-    #     print("Can't connect to the database")
-    #     return 0
-    # # cur = mysql.connection.cursor()
-
-    # # try:
-    #     # db_connection = get_connection()
-    # cur = db_connection.cursor()
-    #     # cur = mysql.config  nnection.cursor()
-    # print("The cur is ", cur)
-
-
-    print("Pssed first test")
-
-    # cur = mysql.connection.cursor()
-    print("The img nme is ", img_name)
-
-    # cur.execute('SELECT * FROM images')
-    # img = cur.fetchall()
-
-    # try:
-    # img = cur.execute("SELECT * from user")
-    # except MySQLdb.OperationalError as e:
-    #     (error_code, msg) = e.args
-    #     print("Errors ",error_code, msg)
-        # plugin already loaded, nothing to do.
-        # if error_code != MYSQL_ERROR_FUNCTION_EXISTS:
-        #     raise
     cursor.execute("SELECT * FROM images WHERE filename = 'my_image1.jpg'")
     img = cursor.fetchone()
 
-    # img = cursor.execute("SELECT * FROM images WHERE filename = 'my_image1.jpg'").fetchone()
-
-    # img = cur.execute('SELECT * FROM images').fetchall()
-    # cursor.execute('SELECT * FROM images')
-# data = cursor.fetchall()
-    print("Pssed here too")
-
-    # img = cur.execute('SELECT * FROM images WHERE image_name = "my_image1.jpg"')
-
-    if img:
-        print("The img is", img)
-        # print("Img ststus is ", img['status'])
-    else:
-        print("No such image here")
-
-    print("Pssed second test")
-
 
     if img and img[9] == "Not Found":
-        print("Passed through here")
-        cursor.execute("Update images SET temp_status = %s, updated_at = %s WHERE filename = %s", (1, datetime.now(), img_name, ))
-        # mysql.connection.commit()
-        # cur.close()
-        cursor.execute("COMMIT")
+        # print("Passed through here")
+        location_data = get_location()
+        try:
+            # Start a database transaction
+            cursor.execute('START TRANSACTION')
+
+            query = "INSERT INTO location (city, region, country, latitude, longitude) VALUES (%s, %s, %s, %s, %s) RETURNING locationid"
+            values = (location_data['city'], location_data['region'], location_data['country'], location_data['latitude'], location_data['longitude'])
+
+            # print("Values are ", values)
+
+            cursor.execute(query, values)
+
+            # print("It did pass honestly")
+
+            # Retrieve the primary key value for the new row
+            cursor.execute("SELECT lastval()")
+            new_id = cursor.fetchone()[0]
+
+            # print("The new id is ", new_id)
+
+            cursor.execute("Update images SET temp_status = %s, updated_at = %s, locationid = %s WHERE filename = %s", (1, datetime.now(), new_id, img_name, ))
+            
+            cursor.execute("COMMIT")
+
+            print("Success!!!")
+        except:
+            print("There was error")
+            conn.rollback()
         return "Temporary Status updated successfully"
     else:
         cur.close()
         return "Image Not Found"
 
-# except:
-    #     print("Connection failed to establish!!Please Try again.")
-        
 
 @app.route('/found')
 def found():
-    return render_template('found.html')
+    cursor.execute('SELECT * FROM images WHERE EXTRACT(WEEK FROM updated_at) = EXTRACT(WEEK FROM current_timestamp) AND temp_status = 1;')
+    data = cursor.fetchall()
+    return render_template('found.html', data=data)
+
+
+@app.route('/map')
+def map():
+    return render_template('map.html')
+
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
-# video.release()
 
 if __name__ == "__main__":
     # loadModel()

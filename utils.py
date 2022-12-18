@@ -89,7 +89,7 @@ def verify_predict(model):
 
     if index and results[index] < 1.5:
         return index
-    return results
+    return None
     
 
 # read_image("my_image.jpg")
