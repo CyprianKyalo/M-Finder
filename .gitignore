@@ -5,6 +5,7 @@ my_encoder/
 my_model/
 node_modules/
 static/uploads/
+static/captured/
 train/
 train_data/
 dataset/Fabian_Kyalo

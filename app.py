@@ -370,7 +370,10 @@ def video_feed():
 def update_images_table(index):
     img_name = os.listdir(UPLOAD_FOLDER)[index]
 
-    cursor.execute("SELECT * FROM images WHERE filename = 'my_image1.jpg'")
+    # cursor.execute("SELECT * FROM users WHERE email = %s", (email, ))
+    # user = cursor.fetchone()
+
+    cursor.execute("SELECT * FROM images WHERE filename = %s", (img_name, ))
     img = cursor.fetchone()
 
 
@@ -401,13 +404,55 @@ def update_images_table(index):
             cursor.execute("COMMIT")
 
             print("Success!!!")
+
+            img_path = "./my_taken_image.jpg"
+            new_path = "./static/captured"
+            new_img_path = os.path.join(new_path, img_name) 
+
+
+            cv2.imwrite(new_img_path, cv2.imread(img_path))
+
+
+            message = "Image successfully updated"
+            # return render_template("video.html", message=message)
         except:
-            print("There was error")
+            message = "There was an error"
             conn.rollback()
+
+            # return render_template("video.html", message=message)
         return "Temporary Status updated successfully"
+        # return render_template("video.html", message=message)
     else:
         cur.close()
-        return "Image Not Found"
+        message = "Image Not in The System"
+        return render_template("video.html", message=message)
+
+
+@app.route('/confirm/<id>')
+def confirm(id):
+    try:
+        cursor.execute("Update images SET status = %s, updated_at = %s WHERE imageid = %s", ("Found", datetime.now(), id, ))
+            
+        cursor.execute("COMMIT")
+        message = "Successfully updated!!"
+    except:
+        conn.rollback()
+        message = "There was an error!! Please Try again."
+
+    return render_template('found.html', message=message)
+
+@app.route('/deny/<id>')
+def deny(id):
+    try:
+        cursor.execute("Update images SET temp_status = %s, updated_at = %s, locationid = NULL WHERE imageid = %s", (0, datetime.now(), id, ))
+            
+        cursor.execute("COMMIT")
+        message = "Successfully updated!!"
+    except:
+        conn.rollback()
+        message = "There was an error!! Please Try again."
+
+    return render_template('found.html', message=message)
 
 
 @app.route('/found')
@@ -415,6 +460,29 @@ def found():
     cursor.execute('SELECT * FROM images WHERE EXTRACT(WEEK FROM updated_at) = EXTRACT(WEEK FROM current_timestamp) AND temp_status = 1;')
     data = cursor.fetchall()
     return render_template('found.html', data=data)
+
+@app.route('/get_record/<id>', methods=['GET'])
+def get_record(id):
+    # cursor.execute("SELECT * FROM images WHERE filename = %s", (img_name, ))
+    # img = cursor.fetchone()
+    # query = 
+
+    cursor.execute("SELECT * FROM location WHERE locationid = %s", (id, ))
+    data = cursor.fetchone()
+
+    # data = {
+    #     "city": data[1],
+    #     "region": data[2],
+    #     "country": data[3],
+    #     "latitude": data[4],
+    #     "longitude": data[5]
+    # }
+    # print(jsonify(data))
+
+    return jsonify(data)
+    # return data
+    # return jsonify({'htmlresponse': render_template('response.html', data=data)})
+    # return render_template('found.html', data=data)
 
 
 @app.route('/map')

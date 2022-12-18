@@ -12,6 +12,10 @@
                 <input type="submit" value="Capture" name="click">
             </form>
             <br>
+            {% if message is defined and message %}
+                <div class="alert alert-success">{{ message }}</div>
+            {% endif %}
+            <br>
 
             <img src="{{ url_for('video_feed') }}" height="80%">
         </div>
