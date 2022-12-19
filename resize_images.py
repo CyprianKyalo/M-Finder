@@ -12,11 +12,7 @@ import pandas as pd
 
 
 def getData(dirname="Images", img_shape=(100, 100)):
-    # data = pd.read_csv(url,sep="\t",skiprows=2,header=None,names=['Name','imagenum','url','rect','md5'])
-    # print(data.shape)
-    # totalrows=data.shape[0]
-    # total_personalities = data.Name.nunique()
-    current = 0
+     current = 0
     if not os.path.exists(dirname):
         os.mkdir(dirname)
     j = 0

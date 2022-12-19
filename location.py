@@ -16,7 +16,6 @@ def get_location():
 	# resp = requests.get('https://ipapi.co/{}/json/'.format(ip_addr))
 	resp = requests.get(f'http://api.ipstack.com/{ip_addr}', params={'access_key': api_key})
 
-
 	response = resp.json()
 
 	location = {
