@@ -1,4 +1,4 @@
-<div id="map" style="width: 100%; height: 400px"></div>
+<!-- <div id="map" style="width: 100%; height: 400px"></div>
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
@@ -50,3 +50,49 @@ $(document).ready(function(){
 </script>
 
 <script src="https://maps.googleapis.com/maps/api/js?v=3&key=YOUR_CODE&callback=initMap" async defer></script>
+
+{% extends 'base.html' %}
+
+{% block content %}
+ -->
+ <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDaO9IecSuylYD6sFyMGNKIF5AzFQoFMZA"></script>
+
+
+ <div id="map" style="width: 100%; height: 100%;"></div>
+
+<script>
+  lat = {{ lat }}
+  lng = {{ lng }}
+  console.log(lat, lng)
+  function initMap(lat, lng) {
+    // Create a new map
+    var map = new google.maps.Map(document.getElementById('map'), {
+      center: {lat: lat, lng: lng},
+      zoom: 15
+    });
+
+    // Add a marker for the point with the given latitude and longitude
+    var marker = new google.maps.Marker({
+      position: {lat: lat, lng: lng},
+      map: map
+    });
+
+    var circle = new google.maps.Circle({
+        strokeColor: '#FF0000',
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        fillColor: '#FF0000',
+        fillOpacity: 0.35,
+        map: map,
+        center: {lat: lat, lng: lng},
+        radius: 1200
+      });
+  }
+
+
+// <script>
+  initMap(lat, lng);
+</script>
+
+<!-- </script> -->
+<!-- {% endblock %} -->

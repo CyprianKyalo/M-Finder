@@ -1,7 +1,6 @@
 from flask import Flask, render_template, Response, flash, request, redirect, url_for, session, jsonify
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
-# from flask_mysqldb import MySQL
 from datetime import datetime
 
 from tensorflow.keras.models import load_model
@@ -11,10 +10,10 @@ from location import get_location
 
 import cv2
 import os
-# import MySQLdb
 import re
 
 import psycopg2
+from dotenv import load_dotenv
 
 model_path = "./my_encoder"
 model = load_model(model_path, custom_objects={"SiameseModel": SiameseModel})
@@ -23,27 +22,14 @@ UPLOAD_FOLDER = 'static/uploads/'
  
 app = Flask(__name__)
 
-app.secret_key = "secret key"
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app.secret_key = os.environ['secret_key']
 
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'mfinder'
-# app.config['TESTING'] = True
-# app.config['MYSQL_DATABASE_USER'] = 'root'
-# app.config['MYSQL_DATABASE_PASSWORD'] = ''
-# app.config['MYSQL_DATABASE_DB'] = 'm_finder'
-# app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+dbname = os.environ['DB']
+user = os.environ['USER']
+password = os.environ['PASSWORD']
+host = os.environ['HOST']
 
-# mysql = MySQL(app)
-# # mysql.init_app(app)
-# with app.app_context():
-#     cur = mysql.connection.cursor()
-
-
-conn = psycopg2.connect(dbname="m_finder", user="postgres", password="root", host="localhost")
+conn = psycopg2.connect(dbname=dbname, user=user, password=password, host=host)
 cursor = conn.cursor()
 
 global capture, switch
@@ -55,10 +41,6 @@ FILE_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 video = cv2.VideoCapture(0)
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
-# def loadModel():
-#     global model
-#     model = load_model(model_path, custom_objects={"SiameseModel": SiameseModel})
-#     print("The model has loaded")
 
 def get_connection():
     try:
@@ -101,8 +83,8 @@ def register_post():
         elif not name or not email or not password:
             message = "Please fill in the whole form!!"
         else:
-            query = "INSERT INTO users (name, location, contact, email, password) VALUES (%s, %s, %s, %s, %s)"
-            values = (name, location, contact, email, generate_password_hash(password))
+            query = "INSERT INTO users (name, location, contact, email, password, roleid, status) VALUES (%s, %s, %s, %s, %s, %s)"
+            values = (name, location, contact, email, generate_password_hash(password), 1, 'active')
 
             cursor.execute(query, values)
             # Commit the changes to the database
@@ -127,19 +109,6 @@ def login_post():
         email = request.form['email']
         password = request.form['password']
 
-        # cursor = mysql.connection.cursor()
-        # try:
-        #     query = 'SELECT * FROM users WHERE email = %s'
-        #     value = (email)
-        #     print("Vlue is ", query, value)
-        #     print("Execution ", cursor.execute(query, value))
-        #     user = cursor.fetchone()
-        #     print("User is ", user)
-        #     # user = cursor.execute('SELECT * FROM users WHERE email = %s', (email, )).fetchone()
-        # except:
-        #     message = "No user Exists"
-        #     conn.rollback()
-            # return render_template('login.html', message=message)
         try:
             cursor.execute("SELECT * FROM users WHERE email = %s", (email, ))
             user = cursor.fetchone()
@@ -151,32 +120,18 @@ def login_post():
             
         elif not check_password_hash(user[5], password):
             message = "Wrong Password! Kindly re-enter your credentials."
+        elif user[7] == 'inactive':
+            message = "Your account has been deactivated! Kindly contact the admininstrator."
         else:
             session['loggedin'] = True
             session['userID'] = user[0]
             session['name'] = user[1]
             session['email'] = user[4]
+            session['role'] = user[6]
             message = 'You have successfully logged in!!'
-            # cursor.close()
             return render_template("index.html", message=message)
             
-        # flash(message)
         return render_template('login.html', message=message)
-
-
-        # cursor.execute('SELECT * FROM user WHERE email = %s AND password = %s', (email, password, ))
-        
-        # user = cursor.fetchone()
-        # if user:
-        #     session['loggedin'] = True
-        #     session['userID'] = user['userID']
-        #     session['name'] = user['name']
-        #     session['email'] = user['email']
-        #     message = 'You have successfully logged in!!'
-        #     return render_template("index.html", message=message)
-        # else:
-        #     message = "Wrong Email or Password! Kindly re-enter your credentials."
-        # return render_template('login.html', message=message)
     else:
         message = "There was an error! Please Try again"
         return render_template('login.html', message=message)
@@ -388,6 +343,7 @@ def update_images_table(index):
             values = (location_data['city'], location_data['region'], location_data['country'], location_data['latitude'], location_data['longitude'])
 
             # print("Values are ", values)
+            print(query, values)
 
             cursor.execute(query, values)
 
@@ -417,15 +373,20 @@ def update_images_table(index):
             # return render_template("video.html", message=message)
         except:
             message = "There was an error"
+            print(message)
             conn.rollback()
 
             # return render_template("video.html", message=message)
         return "Temporary Status updated successfully"
         # return render_template("video.html", message=message)
     else:
-        cur.close()
+        # cursor.close()
+        # print("")
         message = "Image Not in The System"
-        return render_template("video.html", message=message)
+
+        return "Image not found in system"
+
+        # return render_template("video.html", message=message)
 
 
 @app.route('/confirm/<id>')
@@ -445,6 +406,8 @@ def confirm(id):
 def deny(id):
     try:
         cursor.execute("Update images SET temp_status = %s, updated_at = %s, locationid = NULL WHERE imageid = %s", (0, datetime.now(), id, ))
+
+        cursor.execute("DELETE FROM location WHERE locationid = %s", (id, ))
             
         cursor.execute("COMMIT")
         message = "Successfully updated!!"
@@ -457,38 +420,52 @@ def deny(id):
 
 @app.route('/found')
 def found():
-    cursor.execute('SELECT * FROM images WHERE EXTRACT(WEEK FROM updated_at) = EXTRACT(WEEK FROM current_timestamp) AND temp_status = 1;')
+    cursor.execute('SELECT * FROM images WHERE EXTRACT(WEEK FROM updated_at) = EXTRACT(WEEK FROM current_timestamp) AND temp_status = 1')
     data = cursor.fetchall()
     return render_template('found.html', data=data)
 
 @app.route('/get_record/<id>', methods=['GET'])
 def get_record(id):
-    # cursor.execute("SELECT * FROM images WHERE filename = %s", (img_name, ))
-    # img = cursor.fetchone()
-    # query = 
-
     cursor.execute("SELECT * FROM location WHERE locationid = %s", (id, ))
     data = cursor.fetchone()
 
-    # data = {
-    #     "city": data[1],
-    #     "region": data[2],
-    #     "country": data[3],
-    #     "latitude": data[4],
-    #     "longitude": data[5]
-    # }
-    # print(jsonify(data))
-
     return jsonify(data)
-    # return data
-    # return jsonify({'htmlresponse': render_template('response.html', data=data)})
-    # return render_template('found.html', data=data)
 
+@app.route('/map/<id>')
+def map(id):
+    cursor.execute("SELECT latitude, longitude FROM location WHERE locationid = %s", (id, ))
+    row = cursor.fetchone()
+    lat = row[0]
+    lng = row[1]
 
-@app.route('/map')
-def map():
-    return render_template('map.html')
+    return render_template('map.html', lat=lat, lng=lng)
 
+@app.route('/users')
+def users():
+    cursor.execute("SELECT * FROM users")
+    data = cursor.fetchall()
+
+    return render_template('users.html', data=data)
+
+@app.route('/change_status/<id>')
+def change_status(id):
+    try:
+        cursor.execute("SELECT status FROM users WHERE userid = %s", (id, ))
+        row = cursor.fetchone()
+
+        if row[0] == 'active':
+            cursor.execute("Update users SET status = %s WHERE userid = %s", ('inactive', id, ))
+        else:
+            cursor.execute("Update users SET status = %s WHERE userid = %s", ('active', id, ))
+
+        cursor.execute("COMMIT")
+        message = "User status successfully updated!!"
+        return render_template('users.html', message=message)
+    except:
+        conn.rollback()
+        message = "There was an error! Please Try again!!"
+
+    return render_template('users.html', message=message)
 
 @app.route("/")
 def index():
@@ -497,4 +474,5 @@ def index():
 
 if __name__ == "__main__":
     # loadModel()
+    load_dotenv()
     app.run(debug=True)

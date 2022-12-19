@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
 <style>
 	a[title]::before {
 	    content: attr(title);
@@ -68,8 +69,10 @@
 				<th class="text-center">Name</th>
 				<th class="text-center">Location</th>
 				<th class="text-center">Date</th>
+				{% if session.get('role') == 2 %}
 				<th class="text-center">Confirm</th>
 				<th class="text-center">Deny</th>
+				{% endif %}
 			</tr>
 		</thead>
 		<tbody>
@@ -79,10 +82,12 @@
 				<th class="text-center"><img src="../static/uploads/{{ record[8] }}" alt="" width="150px" height="100px"></th>
 				<th class="text-center"><img src="../static/captured/{{ record[8] }}" alt="" width="150px" height="100px"></th>
 				<th class="text-center">{{ record[2] }}</th>
-				<th class="text-center"><a href="#" style="color: blue; text-decoration: underline;" id="link" data-parameter="{{ record[12] }}">{{ record[12] }}</a></th>
+				<th class="text-center"><a href="{{ url_for('map', id=record[12]) }}" style="color: blue; text-decoration: underline;" id="link" data-parameter="{{ record[12] }}">{{ record[12] }}</a></th>
 				<th class="text-center">{{ record[10].strftime('%Y-%m-%d') }}</th>
+				{% if session.get('role') == 2 %}
 				<th class="text-center"><a href="{{ url_for('confirm', id=record[0]) }}"><img src="../static/static_images/tick.png" alt="" width="35px" height="35px"></a></th>
 				<th class="text-center"><a href="{{ url_for('deny', id=record[0]) }}"><img src="../static/static_images/close.png" class="text-center" alt="" width="35px" height="35px"></a></th>
+				{% endif %}
 			</tr>
 			{% endfor %}
 		</tbody>
