@@ -395,6 +395,61 @@ def change_status(id):
 
     return render_template('users.html', message=message)
 
+
+@app.route('/profile')
+def profile():
+    id = session['userID']
+    
+    cursor.execute("SELECT * FROM users WHERE userid = %s", (id, ))
+    data = cursor.fetchone()
+
+    return render_template('profile.html', data=data)
+
+
+@app.route('/edit_profile', methods=['POST'])
+def edit_profile():
+    id = session['userID']
+
+    cursor.execute("SELECT * FROM users WHERE userid = %s", (id, ))
+    data = cursor.fetchone()
+
+
+    if request.method == "POST":
+        name = request.form['name']
+        email = request.form['email']
+        location = request.form['location']
+        contact = request.form['contact']
+
+        if 'password' in request.form:
+            password = request.form['password']
+            password = generate_password_hash(password)
+        else:
+            cursor.execute("SELECT password FROM users WHERE userid = %s", (id, ))
+            row = cursor.fetchone()
+
+            password = row[0]
+
+        try:
+            cursor.execute("Update users SET name = %s, location = %s, contact = %s, email = %s, password = %s WHERE userid = %s", (name, location, contact, email, password, id, ))
+
+            cursor.execute("COMMIT")
+            print("Profile edited successfully!!")
+            message = "Profile edited successfully!!"
+ 
+            return render_template("profile.html", data=data, message=message)
+        except:
+            conn.rollback()
+            print("There was an error!! Please Try again.")
+            message = "There was an error!! Please Try again."
+
+        return render_template('profile.html', data=data, message=message)
+    else:
+        message = "There was an issue!! Please Try again."
+
+        return render_template('profile.html', data=data, message=message)
+
+
+
 @app.route("/")
 def index():
     return render_template("index.html")

@@ -276,7 +276,6 @@ INSERT INTO public.location (locationid, city, region, country, latitude, longit
 INSERT INTO public.location (locationid, city, region, country, latitude, longitude) VALUES (10, 'Nairobi', 'Nairobi Province', 'Kenya', '-1.28410000', '36.81550000');
 INSERT INTO public.location (locationid, city, region, country, latitude, longitude) VALUES (11, 'Nairobi', 'Nairobi Province', 'Kenya', '-1.28410000', '36.81550000');
 INSERT INTO public.location (locationid, city, region, country, latitude, longitude) VALUES (12, 'Nairobi', 'Nairobi Province', 'Kenya', '-1.28410000', '36.81550000');
-INSERT INTO public.location (locationid, city, region, country, latitude, longitude) VALUES (13, NULL, NULL, NULL, '-1.3091961', '36.8225462');
 INSERT INTO public.location (locationid, city, region, country, latitude, longitude) VALUES (14, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO public.location (locationid, city, region, country, latitude, longitude) VALUES (15, 'Nairobi', 'Nairobi Province', 'Kenya', '-1.2841', '36.8155');
 INSERT INTO public.location (locationid, city, region, country, latitude, longitude) VALUES (16, NULL, NULL, NULL, NULL, NULL);
@@ -304,8 +303,8 @@ INSERT INTO public.roles (roleid, role_name) VALUES (1, 'user');
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO public.users (userid, name, location, contact, email, password, roleid, status) VALUES (3, 'admin', 'Kitui', '0736423422', 'admin@mfinder.com', 'pbkdf2:sha256:260000$kmZzUMJogutykJ3d$d8e69e5ddea28e5919c43517e7225745789172df24ae03986f90d8ee9878457b', 2, 'active');
-INSERT INTO public.users (userid, name, location, contact, email, password, roleid, status) VALUES (2, 'Fabian', 'Machakos', '0736423422', 'fab@mfinder.com', 'pbkdf2:sha256:260000$cTI2yr9AH9XQobgW$f863f7836ac2a33eb35918343317c79fde79abc9a9e9514a206d45580d5b253d', 1, 'active');
+INSERT INTO public.users (userid, name, location, contact, email, password, roleid, status) VALUES (3, 'admin', 'Jjgjg', '073612423422', 'admin@mfinder.com', 'pbkdf2:sha256:260000$kmZzUMJogutykJ3d$d8e69e5ddea28e5919c43517e7225745789172df24ae03986f90d8ee9878457b', 2, 'active');
+INSERT INTO public.users (userid, name, location, contact, email, password, roleid, status) VALUES (2, 'Fbbb', 'Mmui', '071236423422', 'fab@mfinder.com', 'pbkdf2:sha256:260000$cTI2yr9AH9XQobgW$f863f7836ac2a33eb35918343317c79fde79abc9a9e9514a206d45580d5b253d', 1, 'active');
 
 
 --

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<div class="container py-4 upload">
+    <h3 class="text-dark">My Profile</h3>
+    <p>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        {% endwith %}
+    </p>
+         <form class="form-upload" action="{{ url_for('edit_profile') }}" enctype="multipart/form-data" method="POST">
+            
+            <div class="form-group">
+                <label for="name">User Name</label>
+
+                <div class="input-group">
+                    <input type="text" required value="{{ data[1] }}" name="name" class="form-control" placeholder="Enter User Name" />
+                </div>   
+            </div>
+
+            <div class="form-group">
+                <label for="last_seen_time">Location</label>
+                
+                <div class="input-group">
+                    <input type="text" name="location" value="{{ data[2] }}" class="form-control" placeholder="Enter Location"/>
+
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="last_seen_location">Contact</label>
+                <div class="input-group">
+                    <input type="text" name="contact" value="{{ data[3] }}" id="contact" class="form-control" placeholder="Enter Contact">
+
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="age">Email</label>
+                <div class="input-group">
+                    <input type="email" name="email" value="{{ data[4] }}" class="form-control" placeholder="Enter email" />
+
+                </div>
+            </div>
+
+            <div class="form-group">
+                <p style="color: red">NB: Leave password as blank if you do not intend to change it.</p>
+                <label for="description">Password</label>
+                <div class="input-group">
+                    <input type="password" name="password" class="form-control" placeholder="Enter Password"/>
+
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="upload">Edit</button>
+        </form>
+</div>
+
+{% endblock %}

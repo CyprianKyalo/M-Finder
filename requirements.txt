@@ -3,3 +3,7 @@ azure-cognitiveservices-vision-computervision
 msrest
 flask_mysqldb
 tensorflow
+opencv-python
+python-dotenv
+psycopg2
+Werkzeug
