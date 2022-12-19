@@ -1,9 +1,10 @@
-h1 {
-    border: 2px #eee solid;
-    color: brown;
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;700&display=swap');
+
+/* h1 {
+    color: white;
     text-align: center;
     padding: 10px;
-}
+} */
 
 #video{
     display: flex;
@@ -21,3 +22,233 @@ h1 {
     margin: 10px;
     padding: 20px;
 }  
+
+:root {
+    --primary: #0d6efd;
+    --dark: #21252f;
+    --body: #888;
+    --box-shadow: 0 8px 22px rgba(0, 0, 0, 0.1);
+}
+
+body {
+    font-family: Sora, "sans-serif";
+    line-height: 1.7;
+    color: var(--body);
+}
+
+h1, h2, h3, h4, h5, h6, .display-4 {
+    color: var(--body);
+}
+
+a {
+    color: var(--dark);
+    text-decoration: none;
+}
+
+.navbar {
+    box-shadow: var(--box-shadow);
+}
+
+.navbar .logo {
+    width: 400px;
+}
+
+.navbar .nav-link {
+    font-size: 15px;
+    font-weight: 300;
+}
+
+.btn {
+    padding: 4px 8px;
+    border-width: 2px;
+}
+
+.hero {
+    background-image: url(../static_images/default.jpeg);
+    background-position: center;
+    background-size: cover;
+    background-attachment: fixed;
+    position: relative;
+    z-index: 2;
+}
+
+.hero::after {
+    content: "";
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    background-color: rgba(21, 20, 51, 0.8);
+    z-index: -1;
+}
+
+section {
+    padding-top: 60px;
+    padding-bottom: 60px;
+}
+
+.col-img {
+    background-image: url(../static_images/logo.jpeg);
+    background-position: center;
+    background-size: cover;
+    min-height: 500px;
+}
+
+.iconbox {
+    width: 54px;
+    height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--primary);
+    color: #fff;
+    font-size: 32px;
+    border-radius: 100px;
+    flex: none;
+}
+
+.form-cont input.form-control {
+    margin-bottom: 10px;
+    height: 56px;
+}
+
+.form-cont .form-control {
+    border: transparent;
+    border-radius: 0;
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+.footer-top {
+    padding-bottom: 90px;
+    padding: 20px;
+    background-color: var(--dark);
+}
+
+.footer-top a {
+    color: var(--body);
+}
+
+.footer-top a:hover {
+    color: #fff;
+}
+
+.footer-bottom {
+    background-color: #242933;
+}
+
+/* .login {
+    width: 100%;
+    /* background-size: cover;
+    height: 100vh; 
+} */
+
+.img-fluid {
+    height: 100%;
+    width: 100%;
+    /* background-size: cover; */
+}
+
+.login-row {
+    background: white;
+    border-radius: 30px;
+    box-shadow: 12px 12px 22px;
+}
+
+.login img {
+    border-top-left-radius: 30px;
+    border-bottom-left-radius: 30px;
+}
+
+.inp {
+    height: 50px;
+    width: 100%;
+    padding-left: 10px;
+    border: none;
+    outline: none;
+    border-radius: 60px;
+    box-shadow: -1px 1px 30px -11px rgba(0, 0, 0, 0.75);
+    -webkit-box-shadow: -1px 1px 30px -11px rgba(0, 0, 0, 0.75);
+    -moz-box-shadow: -1px 1px 30px -11px rgba(0, 0, 0, 0.75);
+}
+
+.btn1 {
+    height: 50px;
+    margin-left: 25%;
+    width: 50%;
+    border: none;
+    outline: none;
+    border-radius: 60px;
+    font-weight: 600;
+    background-color: rgb(223, 56, 56);
+    color: white;
+}
+
+.btn1:hover {
+    background: brown;
+    transition: 0.5s;
+}
+
+.reg {
+    background: white;
+    border-radius: 30px;
+    box-shadow: 12px 12px 22px;
+}
+
+.reg-img {
+    background-image: url(../static_images/bg1.jpeg);
+    background-position: center;
+    background-size: cover;
+    min-height: 500px;
+    border-top-left-radius: 30px;
+    border-bottom-left-radius: 30px;
+}
+
+.upload {
+    width: 60%;
+}
+
+.form-upload input.form-control {
+    margin-bottom: 10px;
+    height: 56px;
+}
+
+.form-upload .form-control {
+    border: transparent;
+    border-radius: 0;
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+.reg-form input.form-control {
+    margin-bottom: 10px;
+    height: 40px;
+    width: 90%;
+}
+
+.reg-form .form-control {
+    border: transparent;
+    border-radius: 30px;
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+.search-box{
+/*    background: #c1c1c1;*/
+/*    border: 1px solid #ababab;*/
+/*    padding: 3%;*/
+    width: 40%;
+    margin-left: 69%;
+}
+
+.search-box input:focus{
+    box-shadow:none;
+    border:2px solid #eeeeee;
+}
+.search-list{
+    background: #fff;
+    border: 1px solid #ababab;
+    border-top: none;
+}
+.search-list h3{
+    background: #eee;
+    padding: 3%;color:#fe6f41;
+    margin-bottom: 0%;
+}

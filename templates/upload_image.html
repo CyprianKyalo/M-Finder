@@ -2,8 +2,8 @@
 
 {% block content %}
 
-<div class="main_upload">
-    <h3>Please select an image to upload</h3>
+<div class="container py-4 upload">
+    <h3 class="text-dark">Image Upload</h3>
     <p>
         {% with messages = get_flashed_messages() %}
             {% if messages %}
@@ -35,41 +35,78 @@
     </div> -->
 
 
-    <div class="img_options">
-        <form action="{{ url_for('upload_image') }}" enctype="multipart/form-data" method="POST">
+        <form class="form-upload" action="{{ url_for('upload_image') }}" enctype="multipart/form-data" method="POST">
+            
             <div class="form-group">
+                <!-- <i class="fa fa-user" aria-hidden="true">Icon</i> -->
                 <label for="name">Enter Person's Name</label>
-                <input type="text" required name="name" class="form-control" placeholder="Enter Person's name" />
+
+                <div class="input-group">
+                    <!-- <span class="fa fa-user"></span> -->
+                    <input type="text" required name="name" class="form-control" placeholder="Enter Person's name" />
+                </div>
+                
+                <!-- <input type="text" style="border: none" required name="name" class="form-control" placeholder="Enter Person's name" /> -->
             </div>
 
             <div class="form-group">
                 <label for="last_seen_time">Enter Last Seen Time</label>
-                <input type="time" name="last_seen_time" class="form-control" placeholder="Enter Last Seen Time"/>
+                
+                <div class="input-group">
+                    <!-- <span class="fa fa-clock-o" aria-hidden="true"></span> -->
+                    <input type="time" name="last_seen_time" class="form-control" placeholder="Enter Last Seen Time"/>
+
+                </div>
             </div>
 
             <div class="form-group">
                 <label for="last_seen_location">Enter Last Seen Location</label>
-                <input type="text" name="last_seen_location" id="location" class="form-control" placeholder="Enter Last Seen Location">
+                <div class="input-group">
+                    <!-- <span class="fa fa-map-marker"></span> -->
+                    <input type="text" name="last_seen_location" id="location" class="form-control" placeholder="Enter Last Seen Location">
+
+                </div>
             </div>
 
             <div class="form-group">
                 <label for="age">Enter Person's age</label>
-                <input type="number" name="age" class="form-control" placeholder="Enter Person's age" />
+                <div class="input-group">
+                    <!-- <span class=""></span> -->
+                    <!-- <span class="fa-solid fa-input-numeric"></span> -->
+                    <input type="number" name="age" class="form-control" placeholder="Enter Person's age" />
+
+                </div>
             </div>
 
             <div class="form-group">
                 <label for="description">Enter Person's Description</label>
-                <input type="text" name="description" class="form-control" placeholder="Enter Person's Description"/>
+                <div class="input-group">
+                    <!-- <span class="fa fa-comment"></span> -->
+                    <input type="text" name="description" class="form-control" placeholder="Enter Person's Description"/>
+
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Enter Your Phone Number</label>
+                <div class="input-group">
+                    <!-- <span class="fa fa-comment"></span> -->
+                    <input type="text" name="phone" class="form-control" placeholder="Enter Your Phone Number"/>
+
+                </div>
             </div>
 
             <div class="form-group">
                 <label for="image">Select Image to Upload</label>
-                <input type="file" required name="image" class="form-control"/>
+                <div class="input-group">
+                    <!-- <span class="fa fa-picture-o"></span> -->
+                    <input type="file" required name="image" class="form-control"/>
+
+                </div>
             </div>
 
             <button type="submit" class="btn btn-primary" id="upload">Submit</button>
         </form>
-    </div>
 </div>
 
 {% endblock %}

@@ -32,4 +32,4 @@ def get_siamese_network(input_shape = (128, 128, 3)):
     return siamese_network
 
 siamese_network = get_siamese_network()
-siamese_network.summary()
+# siamese_network.summary()

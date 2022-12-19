@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+	a[title]::before {
+	    content: attr(title);
+	    position: absolute;
+	    top: 110%;
+	    left: 50%;
+	    transform: translate(-50%, 0);
+	    background-color: black;
+	    color: white;
+	    padding: 5px 10px;
+	    border-radius: 3px;
+	    white-space: nowrap;
+	    z-index: 1;
+  	}
+
+	/*a[title]:hover:after {
+	    content: attr(title);
+	    position: absolute;
+	    /*top: 100%;
+	    left: 50%;*/
+	    margin-left: -5px;
+	    border-width: 5px;
+	    border-style: solid;
+	    border-color: black transparent transparent transparent;
+  	}
+
+	a[title]:hover:after {
+	    content: attr(title);
+	    position: absolute;
+	    background-color: white;
+	    border: 1px solid black;
+	    padding: 5px;
+	    white-space: pre;
+	    color: black;
+	}
+</style>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+	$(document).ready(function() {
+	    $('#link').hover(function() {
+	        var parameter = $(this).data('parameter');
+	        $.ajax({
+	            url: '/get_record/' + parameter,
+	            type: 'GET',
+	            success: function(data) {
+	                $('#link').attr('title', data);
+	            }
+	        });
+	    });
+	});
+</script>
+
+
+<div class="container">
+	{% if message is defined and message %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endif %}
+	<table class="table table-hover">
+		<thead>
+			<tr>
+				<th class="text-center">#</th>
+				<th class="text-center">Image</th>
+				<th class="text-center">Captured Image</th>
+				<th class="text-center">Name</th>
+				<th class="text-center">Location</th>
+				<th class="text-center">Date</th>
+				<th class="text-center">Confirm</th>
+				<th class="text-center">Deny</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for record in data %}
+			<tr>
+				<th scope="row" class="text-center">{{ record[0] }}</th>
+				<th class="text-center"><img src="../static/uploads/{{ record[8] }}" alt="" width="150px" height="100px"></th>
+				<th class="text-center"><img src="../static/captured/{{ record[8] }}" alt="" width="150px" height="100px"></th>
+				<th class="text-center">{{ record[2] }}</th>
+				<th class="text-center"><a href="#" style="color: blue; text-decoration: underline;" id="link" data-parameter="{{ record[12] }}">{{ record[12] }}</a></th>
+				<th class="text-center">{{ record[10].strftime('%Y-%m-%d') }}</th>
+				<th class="text-center"><a href="{{ url_for('confirm', id=record[0]) }}"><img src="../static/static_images/tick.png" alt="" width="35px" height="35px"></a></th>
+				<th class="text-center"><a href="{{ url_for('deny', id=record[0]) }}"><img src="../static/static_images/close.png" class="text-center" alt="" width="35px" height="35px"></a></th>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+
+{% endblock %}

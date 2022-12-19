@@ -2,7 +2,42 @@
 
 {% block content %}
 
-<div>
+<section class="login py-10 bg-light">
+    <div class="container">
+        <div class="row login-row no-gutters g-0">
+            <div class="col-lg-5">
+                <img src="../static/static_images/bg1.jpeg" class="img-fluid" alt="">
+            </div>
+            <div class="col-lg-5 ml-5 align-items-center">
+                <h1 class="py-3 text-dark">Welcome Back</h1>
+                <form action="{{ url_for('login_post') }}" method="post">
+                    {% if message is defined and message %}
+                        <div class="alert alert-warning">{{ message }}</div>
+                    {% endif %}
+                    <div class="form-row">
+                        <div class="offest-1 col-lg-10 pt-5">
+                            <input type="email" name="email" class="inp" placeholder="Enter Email">
+                        </div>
+                    </div>
+                    <div class="form-row py-3">
+                        <div class="offest-1 col-lg-10">
+                            <input type="password" name="password" class="inp" placeholder="Enter Password">
+                        </div>
+                    </div> 
+                    <div class="form-row py-3">
+                        <div class="offest-1 col-lg-10">
+                            <button type="submit" class="btn1">Login</button>
+                        </div>
+                    </div>
+                    <a href="#" style="color: blue;">Forgot Password?</a>
+                    <p>Don't have an account? <a href="{{ url_for('registration') }}" style="color: blue;">Register here</a></p>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- <div>
     <div class="login_img">
 
     </div>
@@ -26,6 +61,6 @@
             <p>Not yet registered?<a class="bottom" href="{{ url_for('registration') }}"> Register</a></p>
         </form>
     </div>
-</div>
+</div> -->
 
 {% endblock %}

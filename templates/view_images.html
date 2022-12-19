@@ -2,12 +2,47 @@
 
 {% block content %}
 
-<div>
-    <div>
-        {% for image in images %}
-            <img src="../static/uploads/{{ image }}" alt="">
-        {% endfor %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function(){
+    load_data();
+    function load_data(query)
+    {
+      $.ajax({
+        url:"/livesearch",
+        method:"POST",
+        data:{query:query},
+        success:function(data)
+        {
+          $('#result').html(data);
+          $("#result").append(data.htmlresponse);
+        }
+      });
+    }
+    $('#search_text').keyup(function(){
+      var search = $(this).val();
+      if(search != ''){
+        load_data(search);
+      }else{
+        load_data();
+      }
+    });
+  });
+</script>
+
+<div class="container py-3">
+
+<div class="search-box">
+    <div class="row">
+        
+        <div class="col-md-9">
+            <input type="text" name="search_text" id="search_text" class="form-control" placeholder="Search by name, phone, or location">
+        </div> 
     </div>
+</div>
+
+<div id="result"></div>
+
 </div>
 
 {% endblock %}
