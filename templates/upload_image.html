@@ -15,45 +15,20 @@
             {% endif %}
         {% endwith %}
     </p>
-    <!-- <div class="img_upload">
-        {% if filename %}
-            <img src="" alt="" height="80%">
-        {% else %}
-            <img src="../static/uploads/default.jpeg" alt="" height="80%">
-        {% endif %}
-        <form action="{{ url_for('upload_image') }}" enctype="multipart/form-data" method="POST">
-            {% if message is defined and message %}
-                <div class="alert alert-warning">{{ message }}</div>
-            {% endif %}
-            <div class="form-group">
-                <label for="image">Select Image to Upload</label>
-                <input type="file" required name="image" class="form-control"/>
-            </div>
-
-            <button type="submit" class="btn btn-primary">Upload</button>
-        </form>
-    </div> -->
-
-
-        <form class="form-upload" action="{{ url_for('upload_image') }}" enctype="multipart/form-data" method="POST">
+         <form class="form-upload" action="{{ url_for('upload_image') }}" enctype="multipart/form-data" method="POST">
             
             <div class="form-group">
-                <!-- <i class="fa fa-user" aria-hidden="true">Icon</i> -->
                 <label for="name">Enter Person's Name</label>
 
                 <div class="input-group">
-                    <!-- <span class="fa fa-user"></span> -->
                     <input type="text" required name="name" class="form-control" placeholder="Enter Person's name" />
-                </div>
-                
-                <!-- <input type="text" style="border: none" required name="name" class="form-control" placeholder="Enter Person's name" /> -->
+                </div>   
             </div>
 
             <div class="form-group">
                 <label for="last_seen_time">Enter Last Seen Time</label>
                 
                 <div class="input-group">
-                    <!-- <span class="fa fa-clock-o" aria-hidden="true"></span> -->
                     <input type="time" name="last_seen_time" class="form-control" placeholder="Enter Last Seen Time"/>
 
                 </div>
@@ -62,7 +37,6 @@
             <div class="form-group">
                 <label for="last_seen_location">Enter Last Seen Location</label>
                 <div class="input-group">
-                    <!-- <span class="fa fa-map-marker"></span> -->
                     <input type="text" name="last_seen_location" id="location" class="form-control" placeholder="Enter Last Seen Location">
 
                 </div>
@@ -71,8 +45,6 @@
             <div class="form-group">
                 <label for="age">Enter Person's age</label>
                 <div class="input-group">
-                    <!-- <span class=""></span> -->
-                    <!-- <span class="fa-solid fa-input-numeric"></span> -->
                     <input type="number" name="age" class="form-control" placeholder="Enter Person's age" />
 
                 </div>
@@ -81,7 +53,6 @@
             <div class="form-group">
                 <label for="description">Enter Person's Description</label>
                 <div class="input-group">
-                    <!-- <span class="fa fa-comment"></span> -->
                     <input type="text" name="description" class="form-control" placeholder="Enter Person's Description"/>
 
                 </div>
@@ -90,7 +61,6 @@
             <div class="form-group">
                 <label for="description">Enter Your Phone Number</label>
                 <div class="input-group">
-                    <!-- <span class="fa fa-comment"></span> -->
                     <input type="text" name="phone" class="form-control" placeholder="Enter Your Phone Number"/>
 
                 </div>
@@ -99,7 +69,6 @@
             <div class="form-group">
                 <label for="image">Select Image to Upload</label>
                 <div class="input-group">
-                    <!-- <span class="fa fa-picture-o"></span> -->
                     <input type="file" required name="image" class="form-control"/>
 
                 </div>

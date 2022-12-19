@@ -2,18 +2,17 @@ from flask import Flask, render_template, Response, flash, request, redirect, ur
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from dotenv import load_dotenv
 
 from tensorflow.keras.models import load_model
 from model import SiameseModel
 from utils import verify_predict, extract_face
 from location import get_location
+import connection
 
 import cv2
 import os
 import re
-
-import psycopg2
-from dotenv import load_dotenv
 
 model_path = "./my_encoder"
 model = load_model(model_path, custom_objects={"SiameseModel": SiameseModel})
@@ -24,13 +23,8 @@ app = Flask(__name__)
 
 app.secret_key = os.environ['secret_key']
 
-dbname = os.environ['DB']
-user = os.environ['USER']
-password = os.environ['PASSWORD']
-host = os.environ['HOST']
-
-conn = psycopg2.connect(dbname=dbname, user=user, password=password, host=host)
-cursor = conn.cursor()
+conn = connection.get_connection()
+cursor = connection.get_cursor(conn)
 
 global capture, switch
 capture = 0
@@ -40,19 +34,6 @@ FILE_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
 video = cv2.VideoCapture(0)
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-
-
-def get_connection():
-    try:
-        db_connection = MySQLdb.connect("localhost", 'root', '', 'm_finder')
-    except Exception as e:
-        print("Can't connect to the database")
-        return 0
-
-    return db_connection
-
-def close_connection(db_connection):
-    db_connection.close()
 
 
 @app.route("/registration")
@@ -69,7 +50,6 @@ def register_post():
         location = request.form['location']
         contact = request.form['contact']
 
-        # cursor = mysql.connection.cursor()
         try:
             cursor.execute("SELECT * FROM users WHERE email = %s", (email, ))
             account = cursor.fetchone()
@@ -87,12 +67,8 @@ def register_post():
             values = (name, location, contact, email, generate_password_hash(password), 1, 'active')
 
             cursor.execute(query, values)
-            # Commit the changes to the database
+
             cursor.execute("COMMIT")
-            # cursor.execute('INSERT INTO users VALUES (NULL, % s, % s, % s, % s, % s)', (name, location, contact, email, generate_password_hash(password), ))
-            # mysql.connection.commit()
-            # cursor.close()
-            print(values)
             message = "You have successfully registered! Please proceed to log in."
     elif request.method == "POST":
         message = "Please fill in the form!!"
@@ -154,13 +130,11 @@ def allowed_image(image_name):
 @app.route("/upload_image", methods=['POST'])
 def upload_image():
     message = ''
-    # loggedin = session["loggedin"]
     if "loggedin" not in session:
         flash("Please Login to upload an image")
         return redirect(request.url)
 
     if 'image' not in request.files:
-        # message = "No image uploaded"
         flash("No image uploaded")
         return redirect(request.url)
     
@@ -186,12 +160,8 @@ def upload_image():
         print("Userid is", userID)
 
         query = "INSERT INTO images (userid, name, time, location, age, description, phone, filename, status, updated_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        # "INSERT INTO users (name, location, contact, email, password) VALUES (%s, %s, %s, %s, %s)"
         values = (userID, name, time, location, age, description, phone, filename, status, updated_at)
-        # cursor = mysql.connection.cursor()
-        # cursor.execute('INSERT INTO images VALUES (NULL, % s, % s, % s, % s, % s, % s, % s, % s, % s, % s)', (userID, name, time, location, age, description, phone, filename, status, updated_at, ))
-        # mysql.connection.commit()
-        # cursor.close()
+
         cursor.execute(query, values)
 
         cursor.execute("COMMIT")
@@ -204,16 +174,9 @@ def upload_image():
 
 @app.route('/view_images')
 def view_images():
-    # path = "Path to Image storage"
-    # path = "C:\\Users\\Cyprian\\Desktop\\IS Project\\M-Finder\\static\\uploads"
-    # images = os.listdir(path)
-    # return render_template("View_images.html", images=images)
-
-    # cursor = mysql.connection.cursor()
     cursor.execute('SELECT * FROM images')
     data = cursor.fetchall()
-    # print(data)
-    # cursor.close()
+   
     return render_template("view_images.html", data=data)
 
 @app.route("/livesearch", methods=["POST", "GET"])
@@ -257,7 +220,6 @@ def tasks():
 
     return render_template("video.html")
 
-# @app.route("/video")
 def gen(video):
     global capture
     while True:
@@ -266,7 +228,6 @@ def gen(video):
         if success:
             if(capture):
                 capture = 0
-                # cv2.imwrite("my_taken_image.jpg", image)
                 idx = verify_predict(model)
                 print("The index is ", idx)
                 if idx:
@@ -287,29 +248,12 @@ def gen(video):
                 image = cv2.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
                 cv2.imwrite("my_taken_image.jpg", image)
-                # cv2.imwrite("my_image.jpg", image)
 
                 faceROI = frame_gray[y:y+h, x:x+w]
             ret, jpeg = cv2.imencode('.jpg', image)
 
             frame = jpeg.tobytes()
         
-        # if cv2.waitKey(1) & 0xFF == ord('v'):
-        #     print("Saving Image")
-        #     cv2.imwrite(os.path.join('static', 'imgs', 'input_image.jpg'), image)
-        #     print("The index is ", verify_predict(model))
-
-
-        # if cv2.waitKey(1) & 0xFF == ord('v'):
-        #     print("Saving Image")
-        #     cv2.imwrite(os.path.join('static', 'imgs', 'input_image.jpg'), image)
-
-        #     print("The index is ", verify_predict(model))
-        
-        # try:
-            # ret, jpg = cv2.imencode(".jpg", image)
-            # frame = jpg.tobytes()
-
             yield (b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
@@ -325,15 +269,11 @@ def video_feed():
 def update_images_table(index):
     img_name = os.listdir(UPLOAD_FOLDER)[index]
 
-    # cursor.execute("SELECT * FROM users WHERE email = %s", (email, ))
-    # user = cursor.fetchone()
-
     cursor.execute("SELECT * FROM images WHERE filename = %s", (img_name, ))
     img = cursor.fetchone()
 
 
     if img and img[9] == "Not Found":
-        # print("Passed through here")
         location_data = get_location()
         try:
             # Start a database transaction
@@ -342,18 +282,13 @@ def update_images_table(index):
             query = "INSERT INTO location (city, region, country, latitude, longitude) VALUES (%s, %s, %s, %s, %s) RETURNING locationid"
             values = (location_data['city'], location_data['region'], location_data['country'], location_data['latitude'], location_data['longitude'])
 
-            # print("Values are ", values)
             print(query, values)
 
             cursor.execute(query, values)
 
-            # print("It did pass honestly")
-
             # Retrieve the primary key value for the new row
             cursor.execute("SELECT lastval()")
             new_id = cursor.fetchone()[0]
-
-            # print("The new id is ", new_id)
 
             cursor.execute("Update images SET temp_status = %s, updated_at = %s, locationid = %s WHERE filename = %s", (1, datetime.now(), new_id, img_name, ))
             
@@ -370,23 +305,16 @@ def update_images_table(index):
 
 
             message = "Image successfully updated"
-            # return render_template("video.html", message=message)
         except:
             message = "There was an error"
             print(message)
             conn.rollback()
 
-            # return render_template("video.html", message=message)
         return "Temporary Status updated successfully"
-        # return render_template("video.html", message=message)
     else:
-        # cursor.close()
-        # print("")
         message = "Image Not in The System"
 
         return "Image not found in system"
-
-        # return render_template("video.html", message=message)
 
 
 @app.route('/confirm/<id>')
@@ -473,6 +401,5 @@ def index():
 
 
 if __name__ == "__main__":
-    # loadModel()
     load_dotenv()
     app.run(debug=True)

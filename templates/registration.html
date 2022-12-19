@@ -44,47 +44,4 @@
     </div>
 </div>
 
-<!-- <div class="register">
-    <div class="register_img">
-        <img src="" alt="">
-    </div>
-
-    <div class="register_form">
-        <h2>User Registration</h2>
-        <form action="{{ url_for('register_post') }}" method="post">
-            {% if message is defined and message %}
-			    <div class="alert alert-warning">{{ message }}</div>
-		    {% endif %}
-            <div class="form-group">
-                <label for="name">Name</label>
-                <input type="text" class="form-control" id="name" name="name" placeholder="Enter name">
-            </div>
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="text" class="form-control" id="email" name="email" placeholder="Enter email">
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" class="form-control" id="password" name="password" placeholder="Enter Password">
-            </div>
-            <div class="form-group">
-                <label for="conf_password">Confirm Password</label>
-                <input type="password" class="form-control" id="conf_password" name="conf_password" placeholder="Re-Enter Password to confirm">
-            </div>
-            <div class="form-group">
-                <label for="contact">Contact</label>
-                <input type="text" class="form-control" name="contact" id="contact" placeholder="Enter Contact">
-            </div>
-            <div class="form-group">
-                <label for="location">Location</label>
-                <input type="text" class="form-control" id="location" name="location" placeholder="Enter Location">
-            </div>
-
-            <button type="submit" class="btn btn-primary">Register</button>
-
-            <p>Have an account?<a class="bottom" href="{{ url_for('login') }}"> Login</a></p>
-        </form>
-    </div>
-</div> -->
-
 {% endblock %}

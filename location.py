@@ -1,8 +1,6 @@
 import requests
 import json
 import os
-import time
-
 
 def get_ip():
 	response = requests.get('https://api64.ipify.org?format=json')
@@ -16,10 +14,8 @@ def get_location():
 	api_key = os.environ.get("location_api_key")
 
 	# resp = requests.get('https://ipapi.co/{}/json/'.format(ip_addr))
-	# resp = requests.get('http://api.ipstack.com/{}'.format(ip_addr))
 	resp = requests.get(f'http://api.ipstack.com/{ip_addr}', params={'access_key': api_key})
 
-	# time.sleep(5)
 
 	response = resp.json()
 

@@ -72,9 +72,7 @@ def classify(model, face_list1, face_list2, threshold=1.35):
 
 def verify_predict(model):
     results = []
-    # captured_image = os.path.join('static', 'imgs', 'input_image.jpg')
     captured_image = "my_taken_image.jpg"
-    # print(extract_face(captured_image))
     captured_image = preprocess_input(read_image(captured_image))
 
     for img in os.listdir(images_path):
@@ -91,8 +89,6 @@ def verify_predict(model):
         return index
     return None
     
-
-# read_image("my_image.jpg")
 
 # model = load_model(model_path, custom_objects={"SiameseModel": SiameseModel})
 
