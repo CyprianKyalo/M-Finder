@@ -438,7 +438,7 @@ def map(id):
     lat = row[0]
     lng = row[1]
 
-    return render_template('map.html', lat=lat, lng=lng)
+    return render_template('map.html', lat=lat, lng=lng, key=os.environ['google_maps_api_key'])
 
 @app.route('/users')
 def users():
