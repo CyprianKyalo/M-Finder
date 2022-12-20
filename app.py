@@ -24,6 +24,10 @@ app = Flask(__name__)
 app.secret_key = os.environ['secret_key']
 
 conn = connection.get_connection()
+if conn:
+    print("Connected to DB successfully")
+else:
+    print("Error connecting to DB")
 cursor = connection.get_cursor(conn)
 
 global capture, switch
@@ -63,8 +67,8 @@ def register_post():
         elif not name or not email or not password:
             message = "Please fill in the whole form!!"
         else:
-            query = "INSERT INTO users (name, location, contact, email, password, roleid, status) VALUES (%s, %s, %s, %s, %s, %s)"
-            values = (name, location, contact, email, generate_password_hash(password), 1, 'active')
+            query = "INSERT INTO users (name, location, contact, email, password) VALUES (%s, %s, %s, %s, %s)"
+            values = (name, location, contact, email, generate_password_hash(password))
 
             cursor.execute(query, values)
 
@@ -91,9 +95,12 @@ def login_post():
         except:
             conn.rollback()
 
+        print("User is ", user)
+        print("The hsh is ", check_password_hash(user[5], password))
+        print("The password is ", generate_password_hash(password))
+
         if not user:
             message = "Wrong Email or Password! Kindly re-enter your credentials."
-            
         elif not check_password_hash(user[5], password):
             message = "Wrong Password! Kindly re-enter your credentials."
         elif user[7] == 'inactive':
@@ -145,7 +152,7 @@ def upload_image():
 
     if request.method == "POST" and image and allowed_image(image.filename) and 'name' in request.form:
         filename = secure_filename(image.filename)
-        image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        image.save(os.path.join(UPLOAD_FOLDER, filename))
 
         userID = session['userID']
         name = request.form['name']
@@ -413,21 +420,18 @@ def edit_profile():
     cursor.execute("SELECT * FROM users WHERE userid = %s", (id, ))
     data = cursor.fetchone()
 
-
     if request.method == "POST":
         name = request.form['name']
         email = request.form['email']
         location = request.form['location']
         contact = request.form['contact']
 
-        if 'password' in request.form:
-            password = request.form['password']
-            password = generate_password_hash(password)
+        if 'checkbox' in request.form:
+            password = generate_password_hash(request.form['password'])
+            print("Checkbox is ticked")
         else:
-            cursor.execute("SELECT password FROM users WHERE userid = %s", (id, ))
-            row = cursor.fetchone()
-
-            password = row[0]
+            password = data[5]
+            print("Checkbox not ticked")
 
         try:
             cursor.execute("Update users SET name = %s, location = %s, contact = %s, email = %s, password = %s WHERE userid = %s", (name, location, contact, email, password, id, ))
@@ -435,6 +439,11 @@ def edit_profile():
             cursor.execute("COMMIT")
             print("Profile edited successfully!!")
             message = "Profile edited successfully!!"
+
+            cursor.execute("SELECT * FROM users WHERE userid = %s", (id, ))
+            data = cursor.fetchone()
+
+            session['name'] = data[1]
  
             return render_template("profile.html", data=data, message=message)
         except:

@@ -85,8 +85,10 @@
 				<th class="text-center"><a href="{{ url_for('map', id=record[12]) }}" style="color: blue; text-decoration: underline;" id="link" data-parameter="{{ record[12] }}">{{ record[12] }}</a></th>
 				<th class="text-center">{{ record[10].strftime('%Y-%m-%d') }}</th>
 				{% if session.get('role') == 2 %}
+				{% if record[9] == 'Not Found' %}
 				<th class="text-center"><a href="{{ url_for('confirm', id=record[0]) }}"><img src="../static/static_images/tick.png" alt="" width="35px" height="35px"></a></th>
 				<th class="text-center"><a href="{{ url_for('deny', id=record[0]) }}"><img src="../static/static_images/close.png" class="text-center" alt="" width="35px" height="35px"></a></th>
+				{% endif %}
 				{% endif %}
 			</tr>
 			{% endfor %}
