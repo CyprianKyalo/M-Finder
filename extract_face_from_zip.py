@@ -67,10 +67,10 @@ for folder in folders:
 
 print("---------------Finished Extracting Faces----------")
 
-# for folder in os.listdir("Extracted Faces"):
-#     path = os.path.join("Extracted Faces", folder)
-#     files = os.listdir(path)
-#     if len(files)<2:
-#         shutil.rmtree(path)
+for folder in os.listdir("Extracted Faces"):
+    path = os.path.join("Extracted Faces", folder)
+    files = os.listdir(path)
+    if len(files)<2:
+        shutil.rmtree(path)
 
 print("---------Extraction Complete-------------")
